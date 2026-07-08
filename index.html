@@ -27,7 +27,7 @@
     --shadow:0 2px 12px rgba(75,45,130,0.08), 0 1px 3px rgba(75,45,130,0.06);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;overflow-x:hidden;}
   body{
     background:var(--bg);
     color:var(--ink);
@@ -43,12 +43,13 @@
   .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
 
   /* ---------- layout ---------- */
-  .app{max-width:1180px;margin:0 auto;padding:28px 22px 80px;}
+  .app{max-width:1180px;margin:0 auto;padding:28px 22px 90px;}
+  @media(max-width:640px){ .app{padding:16px 14px 90px;} }
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     gap:16px;margin-bottom:26px;flex-wrap:wrap;
   }
-  .brand{display:flex;align-items:center;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0;}
   .brand-mark{
     width:44px;height:44px;border-radius:50%;
     background:linear-gradient(160deg,#A163D8,var(--accent-dark));
@@ -62,14 +63,30 @@
   .tabs{
     display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);
     border-radius:999px;padding:5px;box-shadow:var(--shadow);flex-wrap:wrap;
+    max-width:100%;
   }
   .tab-btn{
-    border:none;background:transparent;padding:9px 16px;border-radius:999px;
+    border:none;background:transparent;padding:10px 16px;border-radius:999px;min-height:40px;
     font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink-soft);
     cursor:pointer;transition:.15s;white-space:nowrap;
   }
   .tab-btn.active{background:var(--accent);color:#fff;}
   .tab-btn:not(.active):hover{background:var(--surface-2);color:var(--ink);}
+
+  @media(max-width:700px){
+    .topbar{gap:12px;}
+    .tabs{
+      flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+      scrollbar-width:none;width:100%;justify-content:flex-start;
+      border-radius:14px;
+    }
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab-btn{flex:0 0 auto;padding:9px 14px;font-size:13px;}
+    .brand h1{font-size:18px;}
+    .brand h1 .brand-sub{display:block;margin-left:0;margin-top:1px;font-size:12px;}
+    .brand p{font-size:12px;}
+    .brand-mark{width:38px;height:38px;font-size:18px;}
+  }
 
   .panel{display:none;animation:fade .25s ease;}
   .panel.active{display:block;}
@@ -94,7 +111,11 @@
   .grid-4{grid-template-columns:repeat(4,1fr);}
   .grid-2{grid-template-columns:repeat(2,1fr);}
   @media(max-width:880px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}}
-  @media(max-width:520px){.grid-4{grid-template-columns:1fr;}}
+  @media(max-width:400px){.grid-4{grid-template-columns:1fr;}}
+  @media(max-width:700px){
+    .section-head{margin:24px 0 12px;gap:10px;}
+    .section-head h2{font-size:17px;}
+  }
 
   .stat-card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
@@ -128,19 +149,20 @@
   /* ---------- buttons ---------- */
   .btn{
     font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;border-radius:10px;
-    border:1px solid transparent;padding:9px 15px;cursor:pointer;transition:.15s;
-    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+    border:1px solid transparent;padding:10px 16px;cursor:pointer;transition:.15s;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
+    min-height:40px;
   }
   .btn:disabled{opacity:.45;cursor:not-allowed;}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover:not(:disabled){background:var(--accent-dark);}
   .btn-outline{background:var(--surface);color:var(--ink);border-color:var(--border);}
   .btn-outline:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
-  .btn-ghost{background:transparent;color:var(--ink-soft);border-color:transparent;padding:7px 10px;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border-color:transparent;padding:8px 11px;min-height:36px;}
   .btn-ghost:hover:not(:disabled){background:var(--surface-2);color:var(--ink);}
   .btn-danger{background:var(--danger-soft);color:var(--danger);}
   .btn-danger:hover:not(:disabled){background:var(--danger);color:#fff;}
-  .btn-sm{padding:6px 10px;font-size:12px;border-radius:8px;}
+  .btn-sm{padding:7px 11px;font-size:12px;border-radius:8px;min-height:34px;}
   .btn-block{width:100%;justify-content:center;}
 
   /* ---------- table ---------- */
@@ -155,6 +177,32 @@
   .num-cell{font-family:'IBM Plex Mono',monospace;font-weight:600;}
   .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
+  /* 表格在手機上改為卡片式列表，避免橫向擠壓 */
+  @media(max-width:700px){
+    table.responsive-table thead{display:none;}
+    table.responsive-table, table.responsive-table tbody,
+    table.responsive-table tr, table.responsive-table td{display:block;width:100%;}
+    table.responsive-table tbody tr{
+      border:1px solid var(--border);border-radius:12px;padding:4px 12px;
+      margin-bottom:10px;background:var(--surface);
+    }
+    table.responsive-table tbody tr:hover{background:var(--surface);}
+    table.responsive-table td{
+      border:none;padding:8px 0;display:flex;justify-content:space-between;
+      align-items:center;gap:10px;text-align:right;
+    }
+    table.responsive-table td + td{border-top:1px dashed var(--border);}
+    table.responsive-table td::before{
+      content:attr(data-label);font-weight:700;color:var(--ink-soft);font-size:11px;
+      text-transform:uppercase;letter-spacing:.03em;text-align:left;flex:0 0 auto;
+    }
+    table.responsive-table td.cell-block{display:block;text-align:left;}
+    table.responsive-table td.cell-block::before{display:block;margin-bottom:5px;}
+    table.responsive-table td.cell-actions{display:block;text-align:left;}
+    table.responsive-table td.cell-actions::before{display:block;margin-bottom:8px;}
+    table.responsive-table td.cell-actions .row-actions{width:100%;}
+  }
+
   .badge{
     display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
     padding:4px 10px;border-radius:999px;white-space:nowrap;
@@ -168,7 +216,7 @@
   /* ---------- forms ---------- */
   label{font-size:12.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:5px;}
   input[type=text],input[type=number],textarea,select{
-    width:100%;font-family:inherit;font-size:14px;padding:9px 11px;border-radius:9px;
+    width:100%;font-family:inherit;font-size:16px;padding:10px 11px;border-radius:9px;
     border:1px solid var(--border);background:var(--surface-2);color:var(--ink);outline:none;
     transition:.12s;
   }
@@ -176,8 +224,12 @@
   .field{margin-bottom:14px;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .field-help{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
-  .checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);font-weight:600;}
+  .checkline{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink);font-weight:600;line-height:1.5;}
   .checkline input{width:auto;}
+  .checkline input[type=checkbox]{width:19px;height:19px;flex-shrink:0;accent-color:var(--accent);}
+  @media(max-width:560px){
+    .field-row{grid-template-columns:1fr;gap:0;}
+  }
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -200,12 +252,25 @@
   .modal-foot{padding:14px 20px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
   .modal-msg{font-size:14px;line-height:1.6;color:var(--ink);}
 
-  .ing-row{display:grid;grid-template-columns:1fr 100px 34px;gap:8px;margin-bottom:8px;align-items:center;}
+  @media(max-width:560px){
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal-box{max-width:100%;border-radius:18px 18px 0 0;max-height:92vh;}
+    .modal-box.wide{max-width:100%;}
+    .modal-foot{flex-direction:row;}
+    .modal-foot .btn{flex:1;}
+  }
+
+  .ing-row{display:grid;grid-template-columns:1fr 90px 34px;gap:8px;margin-bottom:8px;align-items:center;}
   .ing-row .rm-btn{
     width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);
     color:var(--danger);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
   }
   .ing-row .rm-btn:hover{background:var(--danger-soft);}
+  @media(max-width:400px){
+    .ing-row{grid-template-columns:1fr 72px 32px;gap:6px;}
+    .ing-row select, .ing-row input{padding:8px 7px;font-size:14px;}
+  }
 
   /* ---------- toast ---------- */
   #toast-root{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:10px;}
@@ -525,12 +590,12 @@ function renderMaterials(){
   const rows = materials.map(m => {
     const st = materialStatus(m);
     return `<tr data-id="${m.id}">
-      <td><strong>${esc(m.name)}</strong>${m.note?`<div class="log-detail">${esc(m.note)}</div>`:''}</td>
-      <td>${esc(m.unit)}</td>
-      <td class="num-cell">${fmtNum(m.stock)}</td>
-      <td class="num-cell">${fmtNum(m.safetyStock)}</td>
-      <td>${badgeHTML(st)}</td>
-      <td>
+      <td class="cell-block" data-label="名稱"><strong>${esc(m.name)}</strong>${m.note?`<div class="log-detail">${esc(m.note)}</div>`:''}</td>
+      <td data-label="單位">${esc(m.unit)}</td>
+      <td class="num-cell" data-label="目前庫存">${fmtNum(m.stock)}</td>
+      <td class="num-cell" data-label="安全庫存">${fmtNum(m.safetyStock)}</td>
+      <td data-label="狀態">${badgeHTML(st)}</td>
+      <td class="cell-actions" data-label="操作">
         <div class="row-actions">
           <button class="btn btn-outline btn-sm" data-act="in">進貨</button>
           <button class="btn btn-outline btn-sm" data-act="out">出庫</button>
@@ -541,7 +606,7 @@ function renderMaterials(){
       </td>
     </tr>`;
   }).join('');
-  box.innerHTML = `<table>
+  box.innerHTML = `<table class="responsive-table">
     <thead><tr><th>名稱</th><th>單位</th><th>目前庫存</th><th>安全庫存</th><th>狀態</th><th style="width:280px;">操作</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
@@ -897,15 +962,15 @@ function renderProduction(){
       ? `<div class="prod-banner ok">✓ 庫存充足，可直接製作 ${qty} 個「${esc(product.name)}」！</div>`
       : `<div class="prod-banner bad">✕ 庫存不足，尚缺：${shortfalls.map(r=> `${esc(r.mat? r.mat.name : '（已刪除材料）')} ${fmtNum(Math.abs(r.remain))}${r.mat?esc(r.mat.unit):''}`).join('、')}</div>`;
 
-    tableBox.innerHTML = `<table>
+    tableBox.innerHTML = `<table class="responsive-table">
       <thead><tr><th>原物料</th><th>單位用量</th><th>本次需求</th><th>目前庫存</th><th>結算後剩餘</th><th>狀態</th></tr></thead>
       <tbody>${plan.map(r => `<tr>
-        <td>${r.mat ? esc(r.mat.name) : '<span style="color:var(--danger)">⚠ 已刪除材料</span>'}</td>
-        <td class="num-cell">${fmtNum(r.ing.qty)} ${r.mat?esc(r.mat.unit):''}</td>
-        <td class="num-cell">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td>
-        <td class="num-cell">${fmtNum(r.stock)}</td>
-        <td class="num-cell" style="color:${r.remain<0?'var(--danger)':'var(--ink)'}">${fmtNum(r.remain)}</td>
-        <td>${r.sufficient ? badgeHTML({level:'ok',label:'足夠'}) : badgeHTML({level:'danger',label:'不足'})}</td>
+        <td data-label="原物料">${r.mat ? esc(r.mat.name) : '<span style="color:var(--danger)">⚠ 已刪除材料</span>'}</td>
+        <td class="num-cell" data-label="單位用量">${fmtNum(r.ing.qty)} ${r.mat?esc(r.mat.unit):''}</td>
+        <td class="num-cell" data-label="本次需求">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td>
+        <td class="num-cell" data-label="目前庫存">${fmtNum(r.stock)}</td>
+        <td class="num-cell" data-label="結算後剩餘" style="color:${r.remain<0?'var(--danger)':'var(--ink)'}">${fmtNum(r.remain)}</td>
+        <td data-label="狀態">${r.sufficient ? badgeHTML({level:'ok',label:'足夠'}) : badgeHTML({level:'danger',label:'不足'})}</td>
       </tr>`).join('')}</tbody>
     </table>`;
 
@@ -928,8 +993,8 @@ function renderProduction(){
       title:'確認生產結算',
       bodyHTML:`<p class="modal-msg">即將製作 <strong>${qty}</strong> 個「<strong>${esc(product.name)}</strong>」，
         以下原物料將自動從庫存扣除：</p>
-        <table style="margin-top:10px;"><thead><tr><th>原物料</th><th>扣除量</th></tr></thead>
-        <tbody>${plan.map(r=>`<tr><td>${r.mat?esc(r.mat.name):'（已刪除）'}</td><td class="num-cell">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td></tr>`).join('')}</tbody></table>
+        <table class="responsive-table" style="margin-top:10px;"><thead><tr><th>原物料</th><th>扣除量</th></tr></thead>
+        <tbody>${plan.map(r=>`<tr><td data-label="原物料">${r.mat?esc(r.mat.name):'（已刪除）'}</td><td class="num-cell" data-label="扣除量">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td></tr>`).join('')}</tbody></table>
         ${!allOk ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 部分材料庫存不足，結算後將出現負數庫存，請盡快補貨。</p>` : ''}`,
       confirmText:'確認結算',
       onConfirm:()=>{
@@ -987,7 +1052,7 @@ function renderHistory(){
     return;
   }
 
-  box.innerHTML = `<table>
+  box.innerHTML = `<table class="responsive-table">
     <thead><tr><th style="width:150px;">時間</th><th style="width:110px;">類型</th><th>內容</th><th style="width:110px;">數量變化</th></tr></thead>
     <tbody>${filtered.map(l => {
       const meta = logTypeMeta(l.type);
@@ -1000,10 +1065,10 @@ function renderHistory(){
         ? `<div class="log-detail">${l.details.map(d=>`<span>${esc(d.materialName)} -${fmtNum(d.used)}${esc(d.unit||'')}</span>`).join('')}</div>`
         : '';
       return `<tr>
-        <td class="num-cell">${fmtDate(l.timestamp)}</td>
-        <td><span class="badge ${meta.cls}">${meta.label}</span></td>
-        <td>${esc(l.title)}${l.note?`<div class="log-detail">${esc(l.note)}</div>`:''}${detailHTML}</td>
-        <td>${qtyCell}</td>
+        <td class="num-cell" data-label="時間">${fmtDate(l.timestamp)}</td>
+        <td data-label="類型"><span class="badge ${meta.cls}">${meta.label}</span></td>
+        <td class="cell-block" data-label="內容">${esc(l.title)}${l.note?`<div class="log-detail">${esc(l.note)}</div>`:''}${detailHTML}</td>
+        <td data-label="數量變化">${qtyCell}</td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
@@ -1034,11 +1099,11 @@ function renderDashboard(){
   if(alerts.length === 0){
     lowBox.innerHTML = `<div class="empty">🎉 目前所有原物料庫存皆正常</div>`;
   } else {
-    lowBox.innerHTML = `<div class="card"><table>
+    lowBox.innerHTML = `<div class="card"><table class="responsive-table">
       <thead><tr><th>原物料</th><th>目前庫存</th><th>安全庫存</th><th>狀態</th><th style="width:90px;"></th></tr></thead>
       <tbody>${alerts.map(m=>{
         const st = materialStatus(m);
-        return `<tr data-id="${m.id}"><td><strong>${esc(m.name)}</strong></td><td class="num-cell">${fmtNum(m.stock)} ${esc(m.unit)}</td><td class="num-cell">${fmtNum(m.safetyStock)} ${esc(m.unit)}</td><td>${badgeHTML(st)}</td><td><button class="btn btn-outline btn-sm" data-act="in">進貨</button></td></tr>`;
+        return `<tr data-id="${m.id}"><td class="cell-block" data-label="原物料"><strong>${esc(m.name)}</strong></td><td class="num-cell" data-label="目前庫存">${fmtNum(m.stock)} ${esc(m.unit)}</td><td class="num-cell" data-label="安全庫存">${fmtNum(m.safetyStock)} ${esc(m.unit)}</td><td data-label="狀態">${badgeHTML(st)}</td><td class="cell-actions" data-label=""><button class="btn btn-outline btn-sm" data-act="in">進貨</button></td></tr>`;
       }).join('')}</tbody>
     </table></div>`;
     $$('#dash-lowstock tr').forEach(tr => {
@@ -1051,9 +1116,9 @@ function renderDashboard(){
   if(recent.length === 0){
     recentBox.innerHTML = `<div class="empty">尚無任何異動紀錄</div>`;
   } else {
-    recentBox.innerHTML = `<table><tbody>${recent.map(l=>{
+    recentBox.innerHTML = `<table class="responsive-table"><tbody>${recent.map(l=>{
       const meta = logTypeMeta(l.type);
-      return `<tr><td style="width:140px;" class="num-cell">${fmtDate(l.timestamp)}</td><td style="width:100px;"><span class="badge ${meta.cls}">${meta.label}</span></td><td>${esc(l.title)}</td></tr>`;
+      return `<tr><td style="width:140px;" class="num-cell" data-label="時間">${fmtDate(l.timestamp)}</td><td style="width:100px;" data-label="類型"><span class="badge ${meta.cls}">${meta.label}</span></td><td class="cell-block" data-label="內容">${esc(l.title)}</td></tr>`;
     }).join('')}</tbody></table>`;
   }
 }
