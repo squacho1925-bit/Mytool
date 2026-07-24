@@ -105,6 +105,65 @@
     background-image:radial-gradient(circle at 10px 10px, var(--bg) 9px, transparent 10px);
     background-size:20px 20px;background-position:-10px -10px;background-repeat:repeat-x;
   }
+  .card-photo{
+    height:150px;background-size:cover;background-position:center;background-color:var(--surface-2);
+  }
+  .price-row{margin-top:6px;white-space:nowrap;}
+  .price-sale{font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:var(--accent-dark);}
+  .price-list{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);text-decoration:line-through;margin-left:6px;}
+  .product-info-block{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;
+  }
+  .info-line{display:flex;flex-direction:column;gap:2px;font-size:12.5px;}
+  .info-label{font-weight:700;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+  .info-val{color:var(--ink);line-height:1.5;white-space:pre-wrap;}
+
+  .photo-upload-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+  .photo-preview-box{
+    width:120px;height:120px;border-radius:12px;border:1px dashed var(--border);background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+  }
+  .photo-preview-box img{width:100%;height:100%;object-fit:cover;}
+  #photo-preview-placeholder{font-size:11.5px;color:var(--ink-soft);text-align:center;padding:0 10px;}
+  .photo-upload-actions{display:flex;flex-direction:column;gap:8px;padding-top:6px;}
+
+  /* ---------- 檢視切換 / 成品型錄 ---------- */
+  .view-toggle-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .view-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px;box-shadow:var(--shadow);}
+  .view-toggle-btn{
+    border:none;background:transparent;padding:8px 15px;border-radius:999px;font-family:inherit;
+    font-weight:700;font-size:12.5px;color:var(--ink-soft);cursor:pointer;transition:.15s;white-space:nowrap;
+  }
+  .view-toggle-btn.active{background:var(--accent);color:#fff;}
+  .view-toggle-btn:not(.active):hover{background:var(--surface-2);color:var(--ink);}
+
+  .catalog-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:var(--surface-2);position:relative;}
+  .catalog-photo-empty{
+    height:190px;background:linear-gradient(160deg,var(--accent-soft),var(--surface-2));
+    display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--accent);opacity:.5;
+  }
+  .catalog-edit-btn{
+    position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;
+    padding:6px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:var(--shadow);
+  }
+  .catalog-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1;}
+  .catalog-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin:0;}
+  .catalog-price-row{display:flex;align-items:baseline;gap:8px;}
+  .catalog-desc{font-size:13px;color:var(--ink);line-height:1.6;}
+  .catalog-meta{display:flex;flex-direction:column;gap:6px;margin-top:2px;border-top:1px dashed var(--border);padding-top:10px;}
+  .catalog-meta-row{font-size:12px;line-height:1.5;}
+  .catalog-meta-label{font-weight:700;color:var(--ink-soft);margin-right:4px;}
+  .catalog-empty-price{color:var(--ink-soft);font-size:13px;}
+  .catalog-price-sale{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--accent-dark);}
+  .catalog-price-list{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;}
+  .grid-3-catalog{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);}
+  @media(max-width:980px){.grid-3-catalog{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:620px){.grid-3-catalog{grid-template-columns:1fr;}}
 
   /* ---------- cards & grid ---------- */
   .grid{display:grid;gap:14px;}
@@ -220,6 +279,7 @@
     border:1px solid var(--border);background:var(--surface-2);color:var(--ink);outline:none;
     transition:.12s;
   }
+  textarea{resize:vertical;line-height:1.5;min-height:44px;}
   input:focus,select:focus,textarea:focus{border-color:var(--accent);background:var(--surface);}
   .field{margin-bottom:14px;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -377,8 +437,22 @@
   <section class="panel" id="panel-products">
     <div class="section-head">
       <div><h2>產品配方（魔法配方書）</h2><div class="hint">為每款甜點寫下專屬咒語配方，作為生產結算的依據</div></div>
-      <button class="btn btn-primary" id="btn-add-product">＋ 新增產品配方</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btn-add-product">＋ 新增產品配方</button>
+      </div>
     </div>
+
+    <div class="view-toggle-row">
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="manage">🧾 管理檢視</button>
+        <button class="view-toggle-btn" data-view="catalog">🖼 成品型錄</button>
+      </div>
+      <div id="catalog-actions" style="display:none;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" id="btn-print-catalog">🖨 列印型錄</button>
+        <button class="btn btn-outline btn-sm" id="btn-export-catalog">⬇ 匯出型錄檔案</button>
+      </div>
+    </div>
+
     <div class="grid grid-2" id="products-list"></div>
   </section>
 
@@ -465,6 +539,34 @@ function persist(){
 
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
 
+// 將使用者選擇的圖片壓縮為較小的 JPEG dataURL，避免瀏覽器 localStorage 空間被大圖佔滿
+function compressImageFile(file, maxDim = 900, quality = 0.82){
+  return new Promise((resolve, reject) => {
+    if(!file || !file.type.startsWith('image/')){ reject(new Error('不是有效的圖片檔案')); return; }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('圖片讀取失敗'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('圖片格式無法解析'));
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width >= height){ height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,width,height);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function seedDemoData(){
   if(loadLS(LS_KEYS.seeded, false)) return;
   if(materials.length || products.length) { saveLS(LS_KEYS.seeded, true); return; }
@@ -501,7 +603,14 @@ function seedDemoData(){
       { materialId:findId('鮮奶'), qty:10 },
       { materialId:findId('杯子蛋糕紙模'), qty:1 },
       { materialId:findId('香草莢醬'), qty:0.5 },
-    ], updatedAt:Date.now()
+    ],
+    photo:'', description:'以馬達加斯加香草莢醬與新鮮奶油製作，口感濕潤鬆軟，是店內招牌基礎款。',
+    ingredientsLabel:'中筋麵粉、細砂糖、雞蛋、無鹽奶油、鮮奶、香草莢醬',
+    cautions:'本產品含麩質、蛋、奶製品，過敏體質請留意',
+    storageMethod:'室溫陰涼處，避免陽光直射',
+    shelfLife:'常溫 2 天／冷藏 5 天',
+    listPrice:65, salePrice:55,
+    updatedAt:Date.now()
   }];
   logs = [{ id:uid(), timestamp:Date.now(), type:'system', title:'系統初始化', note:'已建立示範原物料與產品配方，您可以編輯或刪除。', details:[] }];
   persist();
@@ -1154,6 +1263,8 @@ function addIngredientRow(container, materialId='', qty=''){
 
 function openProductForm(editId){
   const editing = editId ? productById(editId) : null;
+  let photoData = editing ? (editing.photo || '') : '';
+
   const body = `
     <div class="field">
       <label>產品名稱</label>
@@ -1167,6 +1278,57 @@ function openProductForm(editId){
       <label>所需原物料清單（以「單一份／單一個」產品為基準用量）</label>
       <div id="ing-rows"></div>
       <button type="button" class="btn btn-outline btn-sm" id="btn-add-row" style="margin-top:4px;">＋ 新增材料</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="field-help" style="font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:12px;">🖼 成品資訊（照片、介紹、售價等，選填）</div>
+
+    <div class="field">
+      <label>成品照片</label>
+      <div class="photo-upload-row">
+        <div class="photo-preview-box" id="photo-preview-box">
+          ${photoData ? `<img id="photo-preview-img" src="${photoData}" alt="成品照片預覽">` : `<span id="photo-preview-placeholder">尚未上傳照片</span>`}
+        </div>
+        <div class="photo-upload-actions">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+            選擇照片<input type="file" id="f-photo" accept="image/*" style="display:none;">
+          </label>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-photo" style="color:var(--danger);">移除照片</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>產品介紹（選填）</label>
+      <textarea id="f-desc" rows="2" placeholder="例如：以香草莢醬與新鮮奶油製作，口感濕潤鬆軟…">${editing?esc(editing.description||''):''}</textarea>
+    </div>
+    <div class="field">
+      <label>成份標示（選填，供包裝標籤使用）</label>
+      <textarea id="f-ingredients-label" rows="2" placeholder="例如：中筋麵粉、細砂糖、雞蛋、無鹽奶油、鮮奶、香草莢醬">${editing?esc(editing.ingredientsLabel||''):''}</textarea>
+    </div>
+    <div class="field">
+      <label>注意事項（選填，如過敏原）</label>
+      <textarea id="f-cautions" rows="2" placeholder="例如：本產品含麩質、蛋、奶製品，過敏體質請留意">${editing?esc(editing.cautions||''):''}</textarea>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>保存方式（選填）</label>
+        <input type="text" id="f-storage" placeholder="例如：冷藏保存" value="${editing?esc(editing.storageMethod||''):''}">
+      </div>
+      <div class="field">
+        <label>保存期限（選填）</label>
+        <input type="text" id="f-shelflife" placeholder="例如：常溫3天／冷藏7天" value="${editing?esc(editing.shelfLife||''):''}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>定價（選填）</label>
+        <input type="number" id="f-listprice" min="0" step="any" placeholder="0" value="${editing && editing.listPrice ? editing.listPrice : ''}">
+      </div>
+      <div class="field">
+        <label>售價（選填）</label>
+        <input type="number" id="f-saleprice" min="0" step="any" placeholder="0" value="${editing && editing.salePrice ? editing.salePrice : ''}">
+      </div>
     </div>
   `;
   openModal({
@@ -1183,6 +1345,26 @@ function openProductForm(editId){
       }
       $('#btn-add-row', box).addEventListener('click', () => addIngredientRow(rowsBox));
       $('#f-pname', box).focus();
+
+      const fileInput = $('#f-photo', box);
+      const previewBox = $('#photo-preview-box', box);
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if(!file) return;
+        try{
+          showToast('圖片處理中…', 'info');
+          const dataUrl = await compressImageFile(file);
+          photoData = dataUrl;
+          previewBox.innerHTML = `<img id="photo-preview-img" src="${dataUrl}" alt="成品照片預覽">`;
+          showToast('照片已更新，記得按下方按鈕儲存', 'success');
+        } catch(e){
+          showToast('圖片上傳失敗：' + e.message, 'error');
+        }
+      });
+      $('#btn-remove-photo', box).addEventListener('click', () => {
+        photoData = '';
+        previewBox.innerHTML = `<span id="photo-preview-placeholder">尚未上傳照片</span>`;
+      });
     },
     onConfirm:(box)=>{
       const name = $('#f-pname', box).value.trim();
@@ -1203,13 +1385,31 @@ function openProductForm(editId){
         ingredients.push({ materialId:mid, qty });
       }
 
+      const listPriceRaw = $('#f-listprice', box).value;
+      const salePriceRaw = $('#f-saleprice', box).value;
+      const listPrice = listPriceRaw === '' ? 0 : parseFloat(listPriceRaw);
+      const salePrice = salePriceRaw === '' ? 0 : parseFloat(salePriceRaw);
+      if(listPriceRaw !== '' && (isNaN(listPrice) || listPrice < 0)){ showToast('定價需為大於等於 0 的數字', 'error'); return false; }
+      if(salePriceRaw !== '' && (isNaN(salePrice) || salePrice < 0)){ showToast('售價需為大於等於 0 的數字', 'error'); return false; }
+
+      const extra = {
+        photo: photoData,
+        description: $('#f-desc', box).value.trim(),
+        ingredientsLabel: $('#f-ingredients-label', box).value.trim(),
+        cautions: $('#f-cautions', box).value.trim(),
+        storageMethod: $('#f-storage', box).value.trim(),
+        shelfLife: $('#f-shelflife', box).value.trim(),
+        listPrice, salePrice
+      };
+
       if(editing){
         editing.name = name; editing.note = $('#f-pnote', box).value.trim();
         editing.ingredients = ingredients; editing.updatedAt = Date.now();
+        Object.assign(editing, extra);
         addLog({ type:'product', title:`編輯產品配方「${name}」`, note:`共 ${ingredients.length} 項原物料`, details:[] });
         showToast('已儲存配方變更', 'success');
       } else {
-        products.push({ id:uid(), name, note:$('#f-pnote', box).value.trim(), ingredients, updatedAt:Date.now() });
+        products.push(Object.assign({ id:uid(), name, note:$('#f-pnote', box).value.trim(), ingredients, updatedAt:Date.now() }, extra));
         addLog({ type:'product', title:`新增產品配方「${name}」`, note:`共 ${ingredients.length} 項原物料`, details:[] });
         showToast('已建立產品配方', 'success');
       }
@@ -1233,28 +1433,78 @@ function confirmDeleteProduct(productId){
   });
 }
 
+let productViewMode = 'manage'; // 'manage' | 'catalog'
+
+function productInfoRows(p){
+  return [
+    p.description ? ['產品介紹', p.description] : null,
+    p.ingredientsLabel ? ['成份標示', p.ingredientsLabel] : null,
+    p.cautions ? ['注意事項', p.cautions] : null,
+    p.storageMethod ? ['保存方式', p.storageMethod] : null,
+    p.shelfLife ? ['保存期限', p.shelfLife] : null,
+  ].filter(Boolean);
+}
+function productPriceHTML(p, saleClass='price-sale', listClass='price-list'){
+  const hasPrice = (p.listPrice > 0 || p.salePrice > 0);
+  if(!hasPrice) return '';
+  if(p.salePrice > 0 && p.listPrice > 0 && p.salePrice !== p.listPrice){
+    return `<span class="${saleClass}">$${fmtNum(p.salePrice)}</span><span class="${listClass}">$${fmtNum(p.listPrice)}</span>`;
+  } else if(p.salePrice > 0){
+    return `<span class="${saleClass}">$${fmtNum(p.salePrice)}</span>`;
+  } else {
+    return `<span class="${saleClass}">$${fmtNum(p.listPrice)}</span>`;
+  }
+}
+
 function renderProducts(){
   const box = $('#products-list');
+  $$('.view-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.view === productViewMode));
+  $('#catalog-actions').style.display = productViewMode === 'catalog' ? 'flex' : 'none';
+
   if(products.length === 0){
+    box.className = 'grid grid-2';
     box.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="big">📋</div>尚未建立任何產品配方<br>點選「新增產品配方」設定杯子蛋糕、餅乾等品項所需的原物料</div>`;
     return;
   }
+
+  if(productViewMode === 'catalog'){
+    box.className = 'grid-3-catalog';
+    box.innerHTML = products.map(p => catalogCardHTML(p, true)).join('');
+    $$('#products-list .catalog-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openProductForm(btn.dataset.id));
+    });
+    return;
+  }
+
+  // ---- 管理檢視（原本的配方管理卡片） ----
+  box.className = 'grid grid-2';
   box.innerHTML = products.map(p => {
     const rows = p.ingredients.map(i => {
       const m = materialById(i.materialId);
       if(!m) return `<tr><td colspan="3" style="color:var(--danger);">⚠ 原物料已被刪除</td></tr>`;
       return `<tr><td>${esc(m.name)}</td><td class="num-cell">${fmtNum(i.qty)}</td><td>${esc(m.unit)}</td></tr>`;
     }).join('');
+
+    const priceInline = productPriceHTML(p);
+    const infoRows = productInfoRows(p);
+    const infoHTML = infoRows.length ? `<div class="product-info-block">
+        ${infoRows.map(([label,val]) => `<div class="info-line"><span class="info-label">${esc(label)}</span><span class="info-val">${esc(val)}</span></div>`).join('')}
+      </div>` : '';
+
     return `<div class="card" data-id="${p.id}">
-      <div class="scallop"></div>
+      ${p.photo ? `<div class="card-photo" style="background-image:url('${p.photo}')"></div>` : `<div class="scallop"></div>`}
       <div class="card-header">
         <div>
           <h3>${esc(p.name)}</h3>
           ${p.note ? `<div class="sub">${esc(p.note)}</div>` : ''}
         </div>
-        <span class="badge badge-accent">${p.ingredients.length} 項原料</span>
+        <div style="text-align:right;flex-shrink:0;">
+          <span class="badge badge-accent">${p.ingredients.length} 項原料</span>
+          ${priceInline ? `<div class="price-row">${priceInline}</div>` : ''}
+        </div>
       </div>
       <div class="card-body">
+        ${infoHTML}
         <table>
           <thead><tr><th>原物料</th><th>單位用量</th><th>單位</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -1278,6 +1528,32 @@ function renderProducts(){
     card.querySelector('[data-act=edit]').addEventListener('click', () => openProductForm(id));
     card.querySelector('[data-act=delete]').addEventListener('click', () => confirmDeleteProduct(id));
   });
+}
+
+$$('.view-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => { productViewMode = btn.dataset.view; renderProducts(); });
+});
+
+// 產生一張「成品型錄」卡片（給顧客看的版本：無原料配方、無庫存資訊）
+// includeEditBtn=true 時會加上小小的編輯捷徑（僅限站內管理檢視使用，匯出檔案時應設為 false）
+function catalogCardHTML(p, includeEditBtn){
+  const priceInline = productPriceHTML(p, 'catalog-price-sale', 'catalog-price-list');
+  const infoRows = productInfoRows(p).filter(([label]) => label !== '產品介紹');
+  const desc = p.description ? `<div class="catalog-desc">${esc(p.description)}</div>` : '';
+  const metaHTML = infoRows.length ? `<div class="catalog-meta">
+      ${infoRows.map(([label,val]) => `<div class="catalog-meta-row"><span class="catalog-meta-label">${esc(label)}</span>${esc(val)}</div>`).join('')}
+    </div>` : '';
+  return `<div class="catalog-card" data-id="${p.id}">
+    ${p.photo
+      ? `<div class="catalog-photo" style="background-image:url('${p.photo}')">${includeEditBtn?`<button type="button" class="catalog-edit-btn" data-id="${p.id}">✎ 編輯</button>`:''}</div>`
+      : `<div class="catalog-photo-empty">🧁${includeEditBtn?`<button type="button" class="catalog-edit-btn" data-id="${p.id}">✎ 編輯</button>`:''}</div>`}
+    <div class="catalog-body">
+      <h3 class="catalog-name">${esc(p.name)}</h3>
+      <div class="catalog-price-row">${priceInline || `<span class="catalog-empty-price">尚未設定售價</span>`}</div>
+      ${desc}
+      ${metaHTML}
+    </div>
+  </div>`;
 }
 
 /* =========================================================
@@ -1598,6 +1874,71 @@ $('#btn-export-logs').addEventListener('click', () => {
 ========================================================= */
 $('#btn-add-material').addEventListener('click', () => openMaterialForm(null));
 $('#btn-add-product').addEventListener('click', () => openProductForm(null));
+
+/* =========================================================
+   成品型錄：列印 / 匯出獨立檔案
+========================================================= */
+function catalogStandaloneCSS(){
+  return `
+    *{box-sizing:border-box;}
+    body{margin:0;padding:32px 24px;background:#F1ECF9;color:#2E2148;font-family:'Manrope',system-ui,-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;}
+    h1{font-family:'Fraunces',Georgia,'Noto Serif TC',serif;font-size:24px;margin:0 0 4px;}
+    .catalog-sub{color:#7C6E97;font-size:13px;margin:0 0 26px;}
+    .grid-3-catalog{display:grid;gap:18px;grid-template-columns:repeat(3,1fr);max-width:1180px;margin:0 auto;}
+    @media(max-width:900px){.grid-3-catalog{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:560px){.grid-3-catalog{grid-template-columns:1fr;}}
+    .catalog-card{background:#fff;border:1px solid #E2D5F2;border-radius:14px;box-shadow:0 2px 12px rgba(75,45,130,0.08);overflow:hidden;display:flex;flex-direction:column;}
+    .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:#F8F3FC;}
+    .catalog-photo-empty{height:190px;background:linear-gradient(160deg,#EEE2FA,#F8F3FC);display:flex;align-items:center;justify-content:center;font-size:44px;color:#8B4FC7;opacity:.5;}
+    .catalog-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1;}
+    .catalog-name{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;margin:0;}
+    .catalog-price-row{display:flex;align-items:baseline;gap:8px;}
+    .catalog-price-sale{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px;color:#6B37A3;}
+    .catalog-price-list{font-family:ui-monospace,monospace;font-size:13px;color:#7C6E97;text-decoration:line-through;margin-left:8px;}
+    .catalog-empty-price{color:#7C6E97;font-size:13px;}
+    .catalog-desc{font-size:13px;color:#2E2148;line-height:1.6;}
+    .catalog-meta{display:flex;flex-direction:column;gap:6px;margin-top:2px;border-top:1px dashed #E2D5F2;padding-top:10px;}
+    .catalog-meta-row{font-size:12px;line-height:1.5;}
+    .catalog-meta-label{font-weight:700;color:#7C6E97;margin-right:4px;}
+    .catalog-footer{text-align:center;color:#7C6E97;font-size:11.5px;margin-top:30px;}
+    @media print{ body{padding:12px;background:#fff;} .catalog-card{box-shadow:none;break-inside:avoid;} }
+  `;
+}
+function catalogStandaloneDocument(){
+  const cards = products.map(p => catalogCardHTML(p, false)).join('');
+  const now = fmtDate(Date.now());
+  return `<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>巧遇。甜心屋・成品型錄</title>
+<style>${catalogStandaloneCSS()}</style>
+</head><body>
+  <h1>🪄 巧遇。甜心屋・成品型錄</h1>
+  <p class="catalog-sub">更新時間：${now}</p>
+  <div class="grid-3-catalog">${cards}</div>
+  <div class="catalog-footer">價格與供應內容如有異動，依店家最新公告為準。</div>
+</body></html>`;
+}
+$('#btn-print-catalog').addEventListener('click', () => {
+  if(products.length === 0){ showToast('尚未建立任何產品，無法列印型錄', 'error'); return; }
+  const html = catalogStandaloneDocument();
+  const blob = new Blob([html], { type:'text/html' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if(!win){ showToast('瀏覽器阻擋了彈出視窗，請允許彈出視窗後再試一次', 'error'); return; }
+  win.addEventListener('load', () => { win.focus(); win.print(); });
+  showToast('已在新分頁開啟型錄，請於列印視窗中選擇印表機', 'success');
+});
+$('#btn-export-catalog').addEventListener('click', () => {
+  if(products.length === 0){ showToast('尚未建立任何產品，無法匯出型錄', 'error'); return; }
+  const html = catalogStandaloneDocument();
+  const blob = new Blob([html], { type:'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '巧遇甜心屋_成品型錄.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('已匯出成品型錄，可直接傳送給顧客瀏覽', 'success');
+});
 
 /* =========================================================
    統一渲染
