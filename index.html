@@ -119,14 +119,28 @@
   .info-label{font-weight:700;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
   .info-val{color:var(--ink);line-height:1.5;white-space:pre-wrap;}
 
-  .photo-upload-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
-  .photo-preview-box{
-    width:120px;height:120px;border-radius:12px;border:1px dashed var(--border);background:var(--surface-2);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+  .photo-thumb-grid{display:flex;flex-wrap:wrap;gap:10px;}
+  .photo-thumb-empty{
+    font-size:12px;color:var(--ink-soft);border:1px dashed var(--border);border-radius:10px;
+    padding:14px;width:100%;text-align:center;background:var(--surface-2);
   }
-  .photo-preview-box img{width:100%;height:100%;object-fit:cover;}
-  #photo-preview-placeholder{font-size:11.5px;color:var(--ink-soft);text-align:center;padding:0 10px;}
-  .photo-upload-actions{display:flex;flex-direction:column;gap:8px;padding-top:6px;}
+  .photo-thumb{
+    position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;
+    border:2px solid var(--border);flex-shrink:0;
+  }
+  .photo-thumb.is-cover{border-color:var(--accent);}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo-thumb-cover{
+    position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;text-align:center;
+    padding:3px 2px;border:none;cursor:pointer;background:rgba(43,33,24,0.55);color:#fff;
+  }
+  .photo-thumb.is-cover .photo-thumb-cover{background:var(--accent);}
+  .photo-thumb-remove{
+    position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:none;
+    background:rgba(43,33,24,0.55);color:#fff;font-size:11px;cursor:pointer;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .photo-thumb-remove:hover{background:var(--danger);}
 
   /* ---------- 檢視切換 / 成品型錄 ---------- */
   .view-toggle-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
@@ -145,11 +159,30 @@
   .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:var(--surface-2);position:relative;}
   .catalog-photo-empty{
     height:190px;background:linear-gradient(160deg,var(--accent-soft),var(--surface-2));
-    display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--accent);opacity:.5;
+    display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--accent);
+    position:relative;
   }
+  .catalog-photo-empty-icon{opacity:.5;}
   .catalog-edit-btn{
     position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;
     padding:6px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:var(--shadow);
+    z-index:3;
+  }
+  .catalog-gallery{height:190px;position:relative;overflow:hidden;background:var(--surface-2);}
+  .catalog-gallery-track{display:flex;height:100%;width:100%;transition:transform .25s ease;}
+  .catalog-gallery-slide{min-width:100%;height:100%;background-size:cover;background-position:center;}
+  .gallery-nav{
+    position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;
+    border:none;background:rgba(255,255,255,0.85);color:var(--ink);font-size:16px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:2;
+  }
+  .gallery-prev{left:8px;} .gallery-next{right:8px;}
+  .gallery-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;}
+  .gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);cursor:pointer;}
+  .gallery-dot.active{background:#fff;width:16px;border-radius:4px;}
+  .gallery-count{
+    position:absolute;top:10px;left:10px;background:rgba(43,33,24,0.55);color:#fff;font-size:10.5px;
+    font-weight:700;padding:2px 8px;border-radius:999px;z-index:2;
   }
   .catalog-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1;}
   .catalog-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin:0;}
@@ -565,6 +598,18 @@ function compressImageFile(file, maxDim = 900, quality = 0.82){
     };
     reader.readAsDataURL(file);
   });
+}
+
+// ---- 多張照片 / 封面照片 輔助函式（相容舊版單張 photo 欄位資料）----
+function getProductPhotos(p){
+  if(p.photos && p.photos.length) return p.photos;
+  if(p.photo) return [{ id:'legacy', dataUrl:p.photo }];
+  return [];
+}
+function getCoverPhoto(p){
+  const photos = getProductPhotos(p);
+  if(!photos.length) return null;
+  return photos.find(ph => ph.id === p.coverPhotoId) || photos[0];
 }
 
 function seedDemoData(){
@@ -1263,7 +1308,8 @@ function addIngredientRow(container, materialId='', qty=''){
 
 function openProductForm(editId){
   const editing = editId ? productById(editId) : null;
-  let photoData = editing ? (editing.photo || '') : '';
+  let photos = editing ? getProductPhotos(editing).map(ph => ({ id: ph.id, dataUrl: ph.dataUrl })) : [];
+  let coverPhotoId = editing ? (editing.coverPhotoId || (photos[0] && photos[0].id) || '') : '';
 
   const body = `
     <div class="field">
@@ -1284,18 +1330,12 @@ function openProductForm(editId){
     <div class="field-help" style="font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:12px;">🖼 成品資訊（照片、介紹、售價等，選填）</div>
 
     <div class="field">
-      <label>成品照片</label>
-      <div class="photo-upload-row">
-        <div class="photo-preview-box" id="photo-preview-box">
-          ${photoData ? `<img id="photo-preview-img" src="${photoData}" alt="成品照片預覽">` : `<span id="photo-preview-placeholder">尚未上傳照片</span>`}
-        </div>
-        <div class="photo-upload-actions">
-          <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-            選擇照片<input type="file" id="f-photo" accept="image/*" style="display:none;">
-          </label>
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-photo" style="color:var(--danger);">移除照片</button>
-        </div>
-      </div>
+      <label>成品照片<span class="field-help" style="display:inline;">（可上傳多張，張數不限）</span></label>
+      <div id="photo-thumb-grid" class="photo-thumb-grid"></div>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer;display:inline-flex;margin-top:8px;">
+        ＋ 新增照片<input type="file" id="f-photo" accept="image/*" multiple style="display:none;">
+      </label>
+      <div class="field-help" style="margin-top:6px;">點縮圖上的星號可設為「封面照片」，封面照片會用於管理檢視卡片與成品型錄的預設顯示；其餘照片會出現在成品型錄的圖片瀏覽中。</div>
     </div>
 
     <div class="field">
@@ -1347,23 +1387,53 @@ function openProductForm(editId){
       $('#f-pname', box).focus();
 
       const fileInput = $('#f-photo', box);
-      const previewBox = $('#photo-preview-box', box);
-      fileInput.addEventListener('change', async () => {
-        const file = fileInput.files[0];
-        if(!file) return;
-        try{
-          showToast('圖片處理中…', 'info');
-          const dataUrl = await compressImageFile(file);
-          photoData = dataUrl;
-          previewBox.innerHTML = `<img id="photo-preview-img" src="${dataUrl}" alt="成品照片預覽">`;
-          showToast('照片已更新，記得按下方按鈕儲存', 'success');
-        } catch(e){
-          showToast('圖片上傳失敗：' + e.message, 'error');
+      const thumbGrid = $('#photo-thumb-grid', box);
+
+      function renderThumbs(){
+        if(photos.length === 0){
+          thumbGrid.innerHTML = `<div class="photo-thumb-empty">尚未上傳任何照片</div>`;
+          return;
         }
-      });
-      $('#btn-remove-photo', box).addEventListener('click', () => {
-        photoData = '';
-        previewBox.innerHTML = `<span id="photo-preview-placeholder">尚未上傳照片</span>`;
+        thumbGrid.innerHTML = photos.map(ph => `
+          <div class="photo-thumb ${ph.id===coverPhotoId?'is-cover':''}" data-id="${ph.id}">
+            <img src="${ph.dataUrl}" alt="成品照片">
+            <button type="button" class="photo-thumb-cover" title="設為封面照片">${ph.id===coverPhotoId?'★ 封面':'☆ 設為封面'}</button>
+            <button type="button" class="photo-thumb-remove" title="移除照片">✕</button>
+          </div>`).join('');
+        $$('.photo-thumb-cover', thumbGrid).forEach(btn => {
+          btn.addEventListener('click', () => {
+            coverPhotoId = btn.closest('.photo-thumb').dataset.id;
+            renderThumbs();
+          });
+        });
+        $$('.photo-thumb-remove', thumbGrid).forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.closest('.photo-thumb').dataset.id;
+            photos = photos.filter(ph => ph.id !== id);
+            if(coverPhotoId === id){ coverPhotoId = photos[0] ? photos[0].id : ''; }
+            renderThumbs();
+          });
+        });
+      }
+      renderThumbs();
+
+      fileInput.addEventListener('change', async () => {
+        const files = Array.from(fileInput.files || []);
+        if(files.length === 0) return;
+        showToast(`圖片處理中…（${files.length} 張）`, 'info');
+        for(const file of files){
+          try{
+            const dataUrl = await compressImageFile(file);
+            const newPhoto = { id: uid(), dataUrl };
+            photos.push(newPhoto);
+            if(!coverPhotoId){ coverPhotoId = newPhoto.id; }
+          } catch(e){
+            showToast('圖片上傳失敗：' + e.message, 'error');
+          }
+        }
+        renderThumbs();
+        fileInput.value = '';
+        showToast('照片已加入，記得按下方按鈕儲存', 'success');
       });
     },
     onConfirm:(box)=>{
@@ -1393,7 +1463,9 @@ function openProductForm(editId){
       if(salePriceRaw !== '' && (isNaN(salePrice) || salePrice < 0)){ showToast('售價需為大於等於 0 的數字', 'error'); return false; }
 
       const extra = {
-        photo: photoData,
+        photos: photos,
+        coverPhotoId: coverPhotoId,
+        photo: '', // 舊欄位不再使用，清空以免與新資料混淆
         description: $('#f-desc', box).value.trim(),
         ingredientsLabel: $('#f-ingredients-label', box).value.trim(),
         cautions: $('#f-cautions', box).value.trim(),
@@ -1473,6 +1545,7 @@ function renderProducts(){
     $$('#products-list .catalog-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => openProductForm(btn.dataset.id));
     });
+    initCatalogGalleries(box);
     return;
   }
 
@@ -1492,7 +1565,7 @@ function renderProducts(){
       </div>` : '';
 
     return `<div class="card" data-id="${p.id}">
-      ${p.photo ? `<div class="card-photo" style="background-image:url('${p.photo}')"></div>` : `<div class="scallop"></div>`}
+      ${(()=>{ const cover = getCoverPhoto(p); return cover ? `<div class="card-photo" style="background-image:url('${cover.dataUrl}')"></div>` : `<div class="scallop"></div>`; })()}
       <div class="card-header">
         <div>
           <h3>${esc(p.name)}</h3>
@@ -1543,10 +1616,29 @@ function catalogCardHTML(p, includeEditBtn){
   const metaHTML = infoRows.length ? `<div class="catalog-meta">
       ${infoRows.map(([label,val]) => `<div class="catalog-meta-row"><span class="catalog-meta-label">${esc(label)}</span>${esc(val)}</div>`).join('')}
     </div>` : '';
+
+  const photos = getProductPhotos(p);
+  const editBtnHTML = includeEditBtn ? `<button type="button" class="catalog-edit-btn" data-id="${p.id}">✎ 編輯</button>` : '';
+  let photoHTML;
+  if(photos.length === 0){
+    photoHTML = `<div class="catalog-photo-empty"><span class="catalog-photo-empty-icon">🧁</span>${editBtnHTML}</div>`;
+  } else if(photos.length === 1){
+    photoHTML = `<div class="catalog-photo" style="background-image:url('${photos[0].dataUrl}')">${editBtnHTML}</div>`;
+  } else {
+    photoHTML = `<div class="catalog-gallery" data-idx="0">
+      <div class="catalog-gallery-track">
+        ${photos.map(ph => `<div class="catalog-gallery-slide" style="background-image:url('${ph.dataUrl}')"></div>`).join('')}
+      </div>
+      <button type="button" class="gallery-nav gallery-prev" aria-label="上一張">‹</button>
+      <button type="button" class="gallery-nav gallery-next" aria-label="下一張">›</button>
+      <div class="gallery-dots">${photos.map((_,i)=>`<span class="gallery-dot ${i===0?'active':''}"></span>`).join('')}</div>
+      <span class="gallery-count">1 / ${photos.length}</span>
+      ${editBtnHTML}
+    </div>`;
+  }
+
   return `<div class="catalog-card" data-id="${p.id}">
-    ${p.photo
-      ? `<div class="catalog-photo" style="background-image:url('${p.photo}')">${includeEditBtn?`<button type="button" class="catalog-edit-btn" data-id="${p.id}">✎ 編輯</button>`:''}</div>`
-      : `<div class="catalog-photo-empty">🧁${includeEditBtn?`<button type="button" class="catalog-edit-btn" data-id="${p.id}">✎ 編輯</button>`:''}</div>`}
+    ${photoHTML}
     <div class="catalog-body">
       <h3 class="catalog-name">${esc(p.name)}</h3>
       <div class="catalog-price-row">${priceInline || `<span class="catalog-empty-price">尚未設定售價</span>`}</div>
@@ -1554,6 +1646,29 @@ function catalogCardHTML(p, includeEditBtn){
       ${metaHTML}
     </div>
   </div>`;
+}
+
+// 為型錄卡片中的多張照片輪播綁定上一張／下一張／圓點導覽事件（供站內型錄檢視與匯出檔案共用邏輯）
+function initCatalogGalleries(root){
+  root.querySelectorAll('.catalog-gallery').forEach(gallery => {
+    const track = gallery.querySelector('.catalog-gallery-track');
+    const slides = gallery.querySelectorAll('.catalog-gallery-slide');
+    const dots = gallery.querySelectorAll('.gallery-dot');
+    const countLabel = gallery.querySelector('.gallery-count');
+    let idx = 0;
+    function update(){
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      dots.forEach((d,i) => d.classList.toggle('active', i===idx));
+      if(countLabel) countLabel.textContent = `${idx+1} / ${slides.length}`;
+    }
+    gallery.querySelector('.gallery-prev')?.addEventListener('click', (e) => {
+      e.stopPropagation(); idx = (idx - 1 + slides.length) % slides.length; update();
+    });
+    gallery.querySelector('.gallery-next')?.addEventListener('click', (e) => {
+      e.stopPropagation(); idx = (idx + 1) % slides.length; update();
+    });
+    dots.forEach((d,i) => d.addEventListener('click', (e) => { e.stopPropagation(); idx = i; update(); }));
+  });
 }
 
 /* =========================================================
@@ -1889,7 +2004,17 @@ function catalogStandaloneCSS(){
     @media(max-width:560px){.grid-3-catalog{grid-template-columns:1fr;}}
     .catalog-card{background:#fff;border:1px solid #E2D5F2;border-radius:14px;box-shadow:0 2px 12px rgba(75,45,130,0.08);overflow:hidden;display:flex;flex-direction:column;}
     .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:#F8F3FC;}
-    .catalog-photo-empty{height:190px;background:linear-gradient(160deg,#EEE2FA,#F8F3FC);display:flex;align-items:center;justify-content:center;font-size:44px;color:#8B4FC7;opacity:.5;}
+    .catalog-photo-empty{height:190px;background:linear-gradient(160deg,#EEE2FA,#F8F3FC);display:flex;align-items:center;justify-content:center;position:relative;}
+    .catalog-photo-empty-icon{font-size:44px;color:#8B4FC7;opacity:.5;}
+    .catalog-gallery{height:190px;position:relative;overflow:hidden;background:#F8F3FC;}
+    .catalog-gallery-track{display:flex;height:100%;width:100%;transition:transform .25s ease;}
+    .catalog-gallery-slide{min-width:100%;height:100%;background-size:cover;background-position:center;}
+    .gallery-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.85);color:#2E2148;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+    .gallery-prev{left:8px;} .gallery-next{right:8px;}
+    .gallery-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;}
+    .gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);cursor:pointer;}
+    .gallery-dot.active{background:#fff;width:16px;border-radius:4px;}
+    .gallery-count{position:absolute;top:10px;left:10px;background:rgba(43,33,24,0.55);color:#fff;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;}
     .catalog-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1;}
     .catalog-name{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;margin:0;}
     .catalog-price-row{display:flex;align-items:baseline;gap:8px;}
@@ -1901,12 +2026,35 @@ function catalogStandaloneCSS(){
     .catalog-meta-row{font-size:12px;line-height:1.5;}
     .catalog-meta-label{font-weight:700;color:#7C6E97;margin-right:4px;}
     .catalog-footer{text-align:center;color:#7C6E97;font-size:11.5px;margin-top:30px;}
-    @media print{ body{padding:12px;background:#fff;} .catalog-card{box-shadow:none;break-inside:avoid;} }
+    @media print{ body{padding:12px;background:#fff;} .catalog-card{box-shadow:none;break-inside:avoid;} .gallery-nav,.gallery-dots{display:none;} }
+  `;
+}
+function catalogStandaloneScript(){
+  return `
+    document.querySelectorAll('.catalog-gallery').forEach(function(gallery){
+      var track = gallery.querySelector('.catalog-gallery-track');
+      var slides = gallery.querySelectorAll('.catalog-gallery-slide');
+      var dots = gallery.querySelectorAll('.gallery-dot');
+      var countLabel = gallery.querySelector('.gallery-count');
+      var idx = 0;
+      function update(){
+        track.style.transform = 'translateX(-' + (idx*100) + '%)';
+        dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+        if(countLabel) countLabel.textContent = (idx+1) + ' / ' + slides.length;
+      }
+      var prev = gallery.querySelector('.gallery-prev');
+      var next = gallery.querySelector('.gallery-next');
+      if(prev) prev.addEventListener('click', function(){ idx = (idx - 1 + slides.length) % slides.length; update(); });
+      if(next) next.addEventListener('click', function(){ idx = (idx + 1) % slides.length; update(); });
+      dots.forEach(function(d,i){ d.addEventListener('click', function(){ idx = i; update(); }); });
+    });
   `;
 }
 function catalogStandaloneDocument(){
   const cards = products.map(p => catalogCardHTML(p, false)).join('');
   const now = fmtDate(Date.now());
+  const scriptOpen = '<' + 'script>';
+  const scriptClose = '<' + '/script>';
   return `<!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>巧遇。甜心屋・成品型錄</title>
@@ -1916,6 +2064,7 @@ function catalogStandaloneDocument(){
   <p class="catalog-sub">更新時間：${now}</p>
   <div class="grid-3-catalog">${cards}</div>
   <div class="catalog-footer">價格與供應內容如有異動，依店家最新公告為準。</div>
+  ${scriptOpen}${catalogStandaloneScript()}${scriptClose}
 </body></html>`;
 }
 $('#btn-print-catalog').addEventListener('click', () => {
