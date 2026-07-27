@@ -193,6 +193,31 @@
   .catalog-meta-label{font-weight:700;color:var(--ink-soft);margin-right:4px;}
   .catalog-empty-price{color:var(--ink-soft);font-size:13px;}
   .catalog-price-sale{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--accent-dark);}
+
+  /* ---------- 教學影片卡片 ---------- */
+  .video-thumb{
+    height:190px;background-size:cover;background-position:center;background-color:var(--surface-2);
+    position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:inherit;text-decoration:none;
+  }
+  .video-thumb-empty{
+    background:linear-gradient(160deg,var(--accent-soft),var(--surface-2));font-size:40px;color:var(--accent);
+    flex-direction:column;gap:6px;
+  }
+  .video-thumb-hint{font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+  .video-play-btn{
+    width:46px;height:46px;border-radius:50%;border:none;background:rgba(43,33,24,0.55);color:#fff;
+    font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .video-embed-active{padding:0;background:#000;}
+  .video-embed-active iframe{width:100%;height:100%;border:0;display:block;}
+  .video-tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .video-notes{
+    font-size:12.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;
+    background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+    max-height:140px;overflow-y:auto;
+  }
+  .video-notes-empty{color:var(--ink-soft);font-style:italic;}
   .catalog-price-list{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;}
   .grid-3-catalog{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);}
   @media(max-width:980px){.grid-3-catalog{grid-template-columns:repeat(2,1fr);}}
@@ -434,6 +459,7 @@
       <button class="tab-btn" data-tab="materials">🧪 原物料庫存</button>
       <button class="tab-btn" data-tab="products">📖 產品配方</button>
       <button class="tab-btn" data-tab="production">🪄 生產結算</button>
+      <button class="tab-btn" data-tab="videos">🎬 教學影片</button>
       <button class="tab-btn" data-tab="history">📜 異動紀錄</button>
     </nav>
   </div>
@@ -516,6 +542,25 @@
     </div>
   </section>
 
+  <!-- ================= VIDEOS ================= -->
+  <section class="panel" id="panel-videos">
+    <div class="section-head">
+      <div><h2>教學影片庫</h2><div class="hint">收藏上課教學影片連結，並記錄影片中的教學重點筆記</div></div>
+      <button class="btn btn-primary" id="btn-add-video">＋ 新增教學影片</button>
+    </div>
+    <div class="field-row" style="margin-bottom:16px;">
+      <div class="field">
+        <label>篩選分類</label>
+        <select id="v-filter-category"><option value="all">全部分類</option></select>
+      </div>
+      <div class="field">
+        <label>搜尋標題／標籤</label>
+        <input type="text" id="v-filter-text" placeholder="輸入影片標題或標籤…">
+      </div>
+    </div>
+    <div class="grid-3-catalog" id="videos-list"></div>
+  </section>
+
   <!-- ================= HISTORY ================= -->
   <section class="panel" id="panel-history">
     <div class="section-head">
@@ -532,6 +577,7 @@
           <option value="adjust">盤點調整</option>
           <option value="produce">生產結算</option>
           <option value="product">產品配方</option>
+          <option value="video">教學影片</option>
         </select>
       </div>
       <div class="field">
@@ -552,7 +598,7 @@
 /* =========================================================
    資料層 Data Layer
 ========================================================= */
-const LS_KEYS = { materials:'bakery_inv_materials', products:'bakery_inv_products', logs:'bakery_inv_logs', seeded:'bakery_inv_seeded' };
+const LS_KEYS = { materials:'bakery_inv_materials', products:'bakery_inv_products', logs:'bakery_inv_logs', videos:'bakery_inv_videos', seeded:'bakery_inv_seeded' };
 
 function loadLS(key, fallback){
   try{ const v = JSON.parse(localStorage.getItem(key)); return v === null || v === undefined ? fallback : v; }
@@ -563,11 +609,13 @@ function saveLS(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 let materials = loadLS(LS_KEYS.materials, []);
 let products  = loadLS(LS_KEYS.products, []);
 let logs      = loadLS(LS_KEYS.logs, []);
+let videos    = loadLS(LS_KEYS.videos, []);
 
 function persist(){
   saveLS(LS_KEYS.materials, materials);
   saveLS(LS_KEYS.products, products);
   saveLS(LS_KEYS.logs, logs);
+  saveLS(LS_KEYS.videos, videos);
 }
 
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
@@ -1672,6 +1720,219 @@ function initCatalogGalleries(root){
 }
 
 /* =========================================================
+   VIDEOS：教學影片庫
+   說明：影片本身不會存進這個 App（瀏覽器 localStorage 容量僅約 5-10MB，
+   放不下影片檔案），因此以「連結」方式收藏（YouTube／Google 雲端硬碟／
+   自架影音平台等皆可），App 內只儲存連結、分類、標籤與教學重點筆記。
+========================================================= */
+function extractYouTubeId(url){
+  if(!url) return '';
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/shorts\/|youtube\.com\/embed\/|youtu\.be\/)([\w-]{6,})/
+  ];
+  for(const re of patterns){
+    const m = url.match(re);
+    if(m) return m[1];
+  }
+  return '';
+}
+function videoCategories(){
+  const set = new Set(videos.map(v => v.category).filter(Boolean));
+  return [...set].sort((a,b)=>a.localeCompare('zh-Hant'));
+}
+function renderVideoCategoryFilter(){
+  const sel = $('#v-filter-category');
+  const prev = sel.value;
+  const cats = videoCategories();
+  sel.innerHTML = `<option value="all">全部分類</option>` + cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if(cats.includes(prev)) sel.value = prev;
+}
+
+function openVideoForm(editId){
+  const editing = editId ? videos.find(v => v.id === editId) : null;
+  let thumbData = editing ? (editing.thumbnail || '') : '';
+
+  const body = `
+    <div class="field">
+      <label>影片標題</label>
+      <input type="text" id="v-title" placeholder="例如：法式馬卡龍殼製作技巧" value="${editing?esc(editing.title):''}">
+    </div>
+    <div class="field">
+      <label>影片連結（YouTube／雲端硬碟／其他影音平台皆可）</label>
+      <input type="text" id="v-url" placeholder="https://www.youtube.com/watch?v=..." value="${editing?esc(editing.url):''}">
+      <div class="field-help">若貼上 YouTube 連結，卡片會自動顯示影片縮圖，點擊即可直接在頁面內播放。</div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>分類（選填）</label>
+        <input type="text" id="v-category" list="v-category-list" placeholder="例如：麵包基礎課" value="${editing?esc(editing.category||''):''}">
+        <datalist id="v-category-list">${videoCategories().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+      </div>
+      <div class="field">
+        <label>標籤（選填，用逗號分隔）</label>
+        <input type="text" id="v-tags" placeholder="例如：塔皮, 基礎, 老師示範" value="${editing?esc((editing.tags||[]).join(', ')):''}">
+      </div>
+    </div>
+    <div class="field">
+      <label>自訂縮圖（選填，若不是 YouTube 連結時可上傳一張畫面截圖）</label>
+      <div class="photo-thumb-grid" id="v-thumb-grid"></div>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer;display:inline-flex;margin-top:8px;">
+        ${thumbData?'更換縮圖':'上傳縮圖'}<input type="file" id="v-thumb-input" accept="image/*" style="display:none;">
+      </label>
+    </div>
+    <div class="field">
+      <label>教學重點筆記</label>
+      <textarea id="v-notes" rows="6" placeholder="例如：${'\n'}02:15　攪拌至光滑無顆粒即可，切勿過度攪拌${'\n'}05:40　烘烤前靜置 15 分鐘讓表面結皮${'\n'}08:30　出爐後立即脫模避免回縮">${editing?esc(editing.notes||''):''}</textarea>
+      <div class="field-help">可以搭配時間戳記（例如 02:15）記錄影片中的重點段落，方便之後快速複習。</div>
+    </div>
+  `;
+  openModal({
+    title: editing ? '編輯教學影片' : '新增教學影片',
+    wide:true,
+    bodyHTML: body,
+    confirmText: editing ? '儲存變更' : '新增影片',
+    onMount:(box)=>{
+      $('#v-title', box).focus();
+      const thumbGrid = $('#v-thumb-grid', box);
+      const thumbInput = $('#v-thumb-input', box);
+      function renderThumb(){
+        thumbGrid.innerHTML = thumbData
+          ? `<div class="photo-thumb is-cover" data-id="t">
+               <img src="${thumbData}" alt="縮圖預覽">
+               <button type="button" class="photo-thumb-remove" title="移除縮圖">✕</button>
+             </div>`
+          : `<div class="photo-thumb-empty">尚未上傳自訂縮圖</div>`;
+        thumbGrid.querySelector('.photo-thumb-remove')?.addEventListener('click', () => { thumbData=''; renderThumb(); });
+      }
+      renderThumb();
+      thumbInput.addEventListener('change', async () => {
+        const file = thumbInput.files[0];
+        if(!file) return;
+        try{
+          showToast('圖片處理中…', 'info');
+          thumbData = await compressImageFile(file, 600, 0.8);
+          renderThumb();
+          showToast('縮圖已更新', 'success');
+        } catch(e){ showToast('圖片上傳失敗：' + e.message, 'error'); }
+      });
+    },
+    onConfirm:(box)=>{
+      const title = $('#v-title', box).value.trim();
+      const url = $('#v-url', box).value.trim();
+      if(!title){ showToast('請輸入影片標題', 'error'); return false; }
+      if(!url){ showToast('請輸入影片連結', 'error'); return false; }
+      try{ new URL(url); } catch(e){ showToast('影片連結格式不正確，請確認網址是否完整（需含 https://）', 'error'); return false; }
+
+      const category = $('#v-category', box).value.trim();
+      const tags = $('#v-tags', box).value.split(',').map(t=>t.trim()).filter(Boolean);
+      const notes = $('#v-notes', box).value.trim();
+
+      if(editing){
+        Object.assign(editing, { title, url, category, tags, notes, thumbnail:thumbData, updatedAt:Date.now() });
+        addLog({ type:'video', title:`編輯教學影片「${title}」`, note:'', details:[] });
+        showToast('已儲存影片變更', 'success');
+      } else {
+        videos.push({ id:uid(), title, url, category, tags, notes, thumbnail:thumbData, createdAt:Date.now(), updatedAt:Date.now() });
+        addLog({ type:'video', title:`新增教學影片「${title}」`, note:'', details:[] });
+        showToast('已新增教學影片', 'success');
+      }
+      persist(); renderVideos(); renderVideoCategoryFilter(); renderHistory();
+    }
+  });
+}
+
+function confirmDeleteVideo(videoId){
+  const v = videos.find(x => x.id === videoId);
+  if(!v) return;
+  openModal({
+    title:'刪除教學影片',
+    bodyHTML:`<p class="modal-msg">確定要刪除「<strong>${esc(v.title)}</strong>」嗎？筆記內容也會一併刪除，此動作無法復原。</p>`,
+    confirmText:'刪除', danger:true,
+    onConfirm:()=>{
+      videos = videos.filter(x => x.id !== videoId);
+      addLog({ type:'video', title:`刪除教學影片「${v.title}」`, note:'', details:[] });
+      persist(); renderVideos(); renderVideoCategoryFilter(); renderHistory();
+      showToast('已刪除教學影片', 'success');
+    }
+  });
+}
+
+function videoCardHTML(v){
+  const ytId = extractYouTubeId(v.url);
+  const thumb = v.thumbnail || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '');
+  const photoHTML = ytId
+    ? `<div class="video-thumb" data-ytid="${esc(ytId)}" style="${thumb?`background-image:url('${thumb}')`:''}">
+         <button type="button" class="video-play-btn" aria-label="播放影片">▶</button>
+       </div>`
+    : (thumb
+      ? `<a class="video-thumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="background-image:url('${thumb}')"><button type="button" class="video-play-btn" aria-label="前往觀看">▶</button></a>`
+      : `<a class="video-thumb video-thumb-empty" href="${esc(v.url)}" target="_blank" rel="noopener">🎬<span class="video-thumb-hint">前往觀看</span></a>`);
+
+  const tagsHTML = (v.tags && v.tags.length) ? `<div class="video-tags">${v.tags.map(t=>`<span class="batch-tag">#${esc(t)}</span>`).join('')}</div>` : '';
+  const notesHTML = v.notes ? `<div class="video-notes">${esc(v.notes)}</div>` : `<div class="video-notes video-notes-empty">尚未填寫教學重點筆記</div>`;
+
+  return `<div class="catalog-card video-card" data-id="${v.id}">
+    ${photoHTML}
+    <div class="catalog-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <h3 class="catalog-name" style="font-size:16px;">${esc(v.title)}</h3>
+        ${v.category ? `<span class="badge badge-accent" style="flex-shrink:0;">${esc(v.category)}</span>` : ''}
+      </div>
+      ${tagsHTML}
+      ${notesHTML}
+      <div class="row-actions" style="margin-top:6px;">
+        <a class="btn btn-outline btn-sm" href="${esc(v.url)}" target="_blank" rel="noopener">🔗 開啟原始連結</a>
+        <button class="btn btn-ghost btn-sm" data-act="edit">編輯</button>
+        <button class="btn btn-ghost btn-sm" data-act="delete" style="color:var(--danger);">刪除</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderVideos(){
+  renderVideoCategoryFilter();
+  const box = $('#videos-list');
+  const catFilter = $('#v-filter-category').value;
+  const textFilter = $('#v-filter-text').value.trim().toLowerCase();
+
+  let filtered = videos.filter(v => {
+    if(catFilter !== 'all' && v.category !== catFilter) return false;
+    if(textFilter){
+      const hay = (v.title + ' ' + (v.tags||[]).join(' ') + ' ' + (v.category||'')).toLowerCase();
+      if(!hay.includes(textFilter)) return false;
+    }
+    return true;
+  });
+  filtered = filtered.slice().sort((a,b)=> b.createdAt - a.createdAt);
+
+  if(videos.length === 0){
+    box.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="big">🎬</div>尚未收藏任何教學影片<br>點選「新增教學影片」貼上影片連結，並記錄重點筆記</div>`;
+    return;
+  }
+  if(filtered.length === 0){
+    box.innerHTML = `<div class="empty" style="grid-column:1/-1;">沒有符合篩選條件的影片</div>`;
+    return;
+  }
+
+  box.innerHTML = filtered.map(videoCardHTML).join('');
+  $$('#videos-list .video-thumb[data-ytid]').forEach(el => {
+    el.addEventListener('click', () => {
+      const ytid = el.dataset.ytid;
+      el.outerHTML = `<div class="video-thumb video-embed-active"><iframe src="https://www.youtube-nocookie.com/embed/${esc(ytid)}?autoplay=1" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    });
+  });
+  $$('#videos-list .catalog-card').forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector('[data-act=edit]')?.addEventListener('click', () => openVideoForm(id));
+    card.querySelector('[data-act=delete]')?.addEventListener('click', () => confirmDeleteVideo(id));
+  });
+}
+
+$('#btn-add-video').addEventListener('click', () => openVideoForm(null));
+$('#v-filter-category').addEventListener('change', renderVideos);
+$('#v-filter-text').addEventListener('input', renderVideos);
+
+/* =========================================================
    PRODUCTION：生產結算試算
 ========================================================= */
 function renderProductionSelect(){
@@ -1860,6 +2121,7 @@ function logTypeMeta(type){
     produce: { label:'生產結算', cls:'badge-danger' },
     material:{ label:'原物料設定', cls:'badge-neutral' },
     product: { label:'產品配方', cls:'badge-neutral' },
+    video:   { label:'教學影片', cls:'badge-neutral' },
     system:  { label:'系統', cls:'badge-neutral' },
   };
   return map[type] || { label:type, cls:'badge-neutral' };
@@ -2097,6 +2359,7 @@ function renderAll(){
   renderMaterials();
   renderProducts();
   renderProduction();
+  renderVideos();
   renderHistory();
 }
 renderAll();
