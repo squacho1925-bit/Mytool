@@ -212,12 +212,37 @@
   .video-embed-active{padding:0;background:#000;}
   .video-embed-active iframe{width:100%;height:100%;border:0;display:block;}
   .video-tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .video-segments-list{display:flex;flex-wrap:wrap;gap:6px;}
+  .video-segment-item{
+    font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;cursor:pointer;
+    background:var(--accent-soft);color:var(--accent-dark);border:1px solid transparent;text-decoration:none;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .video-segment-item:hover{border-color:var(--accent);}
+  .segment-row{
+    display:grid;grid-template-columns:140px 1fr 34px;gap:8px;margin-bottom:8px;align-items:center;
+  }
+  @media(max-width:600px){
+    .segment-row{grid-template-columns:1fr 34px;grid-template-rows:auto auto;row-gap:6px;}
+    .segment-row .seg-label{grid-column:1;grid-row:1;}
+    .segment-row .seg-url{grid-column:1;grid-row:2;}
+    .segment-row .rm-btn{grid-column:2;grid-row:1 / 3;}
+  }
   .video-notes{
     font-size:12.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;
     background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
     max-height:140px;overflow-y:auto;
   }
   .video-notes-empty{color:var(--ink-soft);font-style:italic;}
+  .video-product-checklist{
+    display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto;
+    border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--surface-2);
+  }
+  .video-product-check{
+    display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 12px;cursor:pointer;
+  }
+  .video-product-check input{width:14px;height:14px;accent-color:var(--accent);}
   .catalog-price-list{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;}
   .grid-3-catalog{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);}
   @media(max-width:980px){.grid-3-catalog{grid-template-columns:repeat(2,1fr);}}
@@ -378,22 +403,53 @@
     .modal-foot .btn{flex:1;}
   }
 
-  .ing-row{display:grid;grid-template-columns:1fr 90px 34px;gap:8px;margin-bottom:8px;align-items:center;}
-  .ing-row .rm-btn{
+  .rm-btn{
     width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);
     color:var(--danger);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
   }
-  .ing-row .rm-btn:hover{background:var(--danger-soft);}
-  .batch-row{display:grid;grid-template-columns:110px 90px 1fr 34px;gap:8px;margin-bottom:8px;align-items:center;}
-  @media(max-width:520px){
-    .batch-row{grid-template-columns:1fr 1fr 34px;grid-template-rows:auto auto;row-gap:6px;}
+  .rm-btn:hover{background:var(--danger-soft);}
+  .ing-row{display:grid;grid-template-columns:1fr 90px 34px;gap:8px;margin-bottom:8px;align-items:center;}
+  .batch-row{
+    display:grid;grid-template-columns:100px 92px 92px 1fr 34px;gap:8px;margin-bottom:8px;align-items:center;
+    background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:8px;
+  }
+  @media(max-width:680px){
+    .batch-row{grid-template-columns:1fr 1fr 34px;grid-template-rows:auto auto auto;row-gap:6px;}
     .batch-row .batch-size{grid-column:1;grid-row:1;}
     .batch-row .batch-count{grid-column:2;grid-row:1;}
-    .batch-row .batch-note{grid-column:1 / 3;grid-row:2;}
+    .batch-row .batch-open{grid-column:1;grid-row:2;}
+    .batch-row .batch-note{grid-column:2;grid-row:2;}
     .batch-row .rm-btn{grid-column:3;grid-row:1 / 3;}
   }
+  .batch-row-labels{
+    display:grid;grid-template-columns:100px 92px 92px 1fr 34px;gap:8px;margin-bottom:4px;
+    font-size:11px;font-weight:700;color:var(--ink-soft);
+  }
+  @media(max-width:680px){ .batch-row-labels{display:none;} }
   .batch-choice-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+
+  .recipe-block{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+    padding:12px;margin-bottom:12px;
+  }
+  .recipe-block-head{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap;}
+  .recipe-block-head .recipe-name{flex:1 1 160px;min-width:120px;}
+  .recipe-block-head .recipe-type{flex:0 1 150px;}
+  .recipe-type-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;}
+  .recipe-view-block{margin-bottom:16px;}
+  .recipe-view-block:last-child{margin-bottom:0;}
+  .recipe-view-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13.5px;}
+
+  .material-group{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px;
+  }
+  .material-group-head{
+    padding:12px 18px;background:var(--surface-2);border-bottom:1px solid var(--border);
+    font-weight:700;font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:10px;
+  }
+  .material-group-count{font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px 9px;}
   .batch-choice{
     display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);
     border-radius:10px;cursor:pointer;font-size:13.5px;transition:.12s;background:var(--surface-2);
@@ -489,7 +545,17 @@
         <button class="btn btn-primary" id="btn-add-material">＋ 新增原物料</button>
       </div>
     </div>
-    <div class="card"><div id="materials-table"></div></div>
+    <div class="field-row" style="margin-bottom:16px;">
+      <div class="field">
+        <label>篩選大項分類</label>
+        <select id="m-filter-category"><option value="all">全部分類</option></select>
+      </div>
+      <div class="field">
+        <label>搜尋名稱／備註</label>
+        <input type="text" id="m-filter-text" placeholder="輸入原物料名稱或備註…">
+      </div>
+    </div>
+    <div id="materials-table"></div>
   </section>
 
   <!-- ================= PRODUCTS ================= -->
@@ -528,9 +594,13 @@
             <select id="pr-select"></select>
           </div>
           <div class="field">
-            <label>製作數量</label>
-            <input type="number" id="pr-qty" min="1" value="1">
+            <label>配方版本</label>
+            <select id="pr-recipe-select"></select>
           </div>
+        </div>
+        <div class="field">
+          <label>製作數量</label>
+          <input type="number" id="pr-qty" min="1" value="1">
         </div>
         <div id="pr-banner"></div>
         <div id="pr-table"></div>
@@ -663,39 +733,57 @@ function getCoverPhoto(p){
 function seedDemoData(){
   if(loadLS(LS_KEYS.seeded, false)) return;
   if(materials.length || products.length) { saveLS(LS_KEYS.seeded, true); return; }
-  const m = (name, unit, stock, safety) => ({ id:uid(), name, unit, stock, safetyStock:safety, trackByPackage:false, packageUnit:'', batches:[], openStock:0, note:'', updatedAt:Date.now() });
-  const mp = (name, unit, safety, packageUnit, batches, openStock) => {
+  const m = (name, unit, stock, safety, category) => ({
+    id:uid(), name, unit, stock, safetyStock:safety, category:category||'', trackByPackage:false,
+    packageUnit:'', batches:[], openBatches:[], knownSpecs:[], pendingShortage:0, note:'', updatedAt:Date.now()
+  });
+  const mp = (name, unit, safety, category, packageUnit, batches, openBatches) => {
     const bs = batches.map(b => ({ id:uid(), size:b.size, count:b.count, note:b.note||'' }));
-    const stock = round2(openStock + bs.reduce((s,b)=>s+b.size*b.count,0));
-    return { id:uid(), name, unit, stock, safetyStock:safety, trackByPackage:true, packageUnit, batches:bs, openStock, note:'', updatedAt:Date.now() };
+    const obs = (openBatches||[]).map(o => ({ id:uid(), size:o.size, note:o.note||'', remaining:o.remaining }));
+    const knownSpecs = bs.map(b => ({ size:b.size, note:b.note }));
+    const stock = round2(obs.reduce((s,o)=>s+o.remaining,0) + bs.reduce((s,b)=>s+b.size*b.count,0));
+    return {
+      id:uid(), name, unit, stock, safetyStock:safety, category:category||'', trackByPackage:true,
+      packageUnit, batches:bs, openBatches:obs, knownSpecs, pendingShortage:0, note:'', updatedAt:Date.now()
+    };
   };
   materials = [
-    mp('中筋麵粉','g', 1000, '包', [
+    mp('中筋麵粉','g', 1000, '麵粉類', '包', [
       { size:200, count:5, note:'大成製粉' },
       { size:350, count:3, note:'福源麵粉' },
-    ], 120),
-    mp('細砂糖','g', 500, '包', [
+    ], [
+      { size:200, note:'大成製粉', remaining:120 },
+    ]),
+    mp('細砂糖','g', 500, '糖類', '包', [
       { size:1000, count:3, note:'台糖' },
-    ], 200),
-    mp('無鹽奶油','g', 300, '包', [
+    ], [
+      { size:1000, note:'台糖', remaining:200 },
+    ]),
+    mp('無鹽奶油','g', 300, '油脂類', '包', [
       { size:200, count:6, note:'安佳' },
-    ], 50),
-    m('雞蛋','顆', 24, 12),
-    m('鮮奶','ml', 2000, 500),
-    m('杯子蛋糕紙模','個', 60, 20),
-    m('香草莢醬','g', 80, 20),
+    ], [
+      { size:200, note:'安佳', remaining:50 },
+    ]),
+    m('雞蛋','顆', 24, 12, '蛋奶類'),
+    m('鮮奶','ml', 2000, 500, '蛋奶類'),
+    m('杯子蛋糕紙模','個', 60, 20, '包材類'),
+    m('香草莢醬','g', 80, 20, '調味粉類'),
   ];
   const findId = n => materials.find(x=>x.name===n).id;
+  const baseIngredients = [
+    { materialId:findId('中筋麵粉'), qty:25 },
+    { materialId:findId('細砂糖'), qty:20 },
+    { materialId:findId('無鹽奶油'), qty:18 },
+    { materialId:findId('雞蛋'), qty:0.3 },
+    { materialId:findId('鮮奶'), qty:10 },
+    { materialId:findId('杯子蛋糕紙模'), qty:1 },
+    { materialId:findId('香草莢醬'), qty:0.5 },
+  ];
   products = [{
     id:uid(), name:'香草杯子蛋糕（單顆）', note:'基礎款香草杯子蛋糕配方，單位為 1 顆',
-    ingredients:[
-      { materialId:findId('中筋麵粉'), qty:25 },
-      { materialId:findId('細砂糖'), qty:20 },
-      { materialId:findId('無鹽奶油'), qty:18 },
-      { materialId:findId('雞蛋'), qty:0.3 },
-      { materialId:findId('鮮奶'), qty:10 },
-      { materialId:findId('杯子蛋糕紙模'), qty:1 },
-      { materialId:findId('香草莢醬'), qty:0.5 },
+    recipes:[
+      { id:uid(), name:'主配方', type:'base', ingredients:baseIngredients },
+      { id:uid(), name:'巧克力口味調整', type:'flavor', ingredients: baseIngredients.map(i=>({...i})) },
     ],
     photo:'', description:'以馬達加斯加香草莢醬與新鮮奶油製作，口感濕潤鬆軟，是店內招牌基礎款。',
     ingredientsLabel:'中筋麵粉、細砂糖、雞蛋、無鹽奶油、鮮奶、香草莢醬',
@@ -705,11 +793,48 @@ function seedDemoData(){
     listPrice:65, salePrice:55,
     updatedAt:Date.now()
   }];
+  videos = [];
   logs = [{ id:uid(), timestamp:Date.now(), type:'system', title:'系統初始化', note:'已建立示範原物料與產品配方，您可以編輯或刪除。', details:[] }];
   persist();
   saveLS(LS_KEYS.seeded, true);
 }
 seedDemoData();
+
+// ---- 舊版資料相容遷移（openStock → openBatches／單一 ingredients → recipes）----
+function migrateLegacyData(){
+  let changed = false;
+  materials.forEach(mat => {
+    if(mat.openStock !== undefined && !mat.openBatches){
+      mat.openBatches = mat.openStock > 0 ? [{ id:uid(), size:mat.openStock, note:'（舊資料遷移）', remaining:mat.openStock }] : [];
+      delete mat.openStock;
+      changed = true;
+    }
+    if(!mat.openBatches) mat.openBatches = [];
+    if(!mat.knownSpecs){
+      mat.knownSpecs = (mat.batches||[]).map(b => ({ size:b.size, note:b.note }));
+      changed = true;
+    }
+    if(mat.pendingShortage === undefined){ mat.pendingShortage = 0; changed = true; }
+    if(mat.category === undefined){ mat.category = ''; changed = true; }
+  });
+  products.forEach(p => {
+    if(!p.recipes){
+      p.recipes = [{ id:uid(), name:'主配方', type:'base', ingredients: p.ingredients || [] }];
+      delete p.ingredients;
+      changed = true;
+    }
+  });
+  videos.forEach(v => {
+    if(!v.productIds){ v.productIds = []; changed = true; }
+    if(!v.segments){
+      v.segments = v.url ? [{ id:uid(), label:'', url:v.url }] : [];
+      delete v.url;
+      changed = true;
+    }
+  });
+  if(changed) persist();
+}
+migrateLegacyData();
 
 /* =========================================================
    小工具 Utils
@@ -730,54 +855,128 @@ const fmtDate = (ts) => {
 function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
 
 /* ---- 整包批次（batches）庫存換算 ----
-   每一項原物料可以同時擁有多種包裝規格的整包庫存（例如中筋麵粉同時有 200g 與 350g 兩種包裝），
-   再加上一份「拆封中庫存」代表目前已開封、正在使用中的零散量。
-   mat.stock 永遠是「拆封中庫存 + 所有批次(規格×包數)加總」，作為配方／生產結算唯一使用的真實總量。 */
+   每一項原物料可同時擁有多種「規格＋品牌」的整包庫存（例如中筋麵粉：大成 200g、福源 350g）。
+   拆封後不會混成單一數字，而是各自變成 openBatches 中對應該規格/品牌的一筆「拆封中」記錄，
+   所以畫面上永遠看得出「拆封中的是哪個品牌、還剩多少」。
+   若消耗量超過目前所有庫存（含尚未開封的整包），不會出現負數：超過的部分會計入 pendingShortage
+   （目前缺貨量），下次進貨時系統會自動優先拿來扣抵這筆欠帳，其餘才算入新庫存。 */
 function batchesTotal(mat){
   return (mat.batches || []).reduce((s,b)=> s + b.size * b.count, 0);
 }
+function openBatchesTotal(mat){
+  return (mat.openBatches || []).reduce((s,b)=> s + b.remaining, 0);
+}
 function recalcMaterialStock(mat){
   if(mat.trackByPackage){
-    mat.stock = round2((mat.openStock || 0) + batchesTotal(mat));
+    mat.stock = round2(openBatchesTotal(mat) + batchesTotal(mat));
   }
 }
-// 從批次庫存中扣除指定基礎單位用量：優先扣拆封中庫存，不夠時依序拆開下一個整包（先進先出）。
-// 若所有整包都拆完仍不足，拆封中庫存會變成負值，代表庫存已超支（提醒使用者需要補貨）。
+function specKey(size, note){ return round2(size) + '|' + (note||'').trim().toLowerCase(); }
+
+// 記住曾經用過的「規格＋品牌」組合，即使庫存歸零，下次進貨時仍可直接挑選，不用重新輸入
+function rememberSpec(mat, size, note){
+  if(!mat.knownSpecs) mat.knownSpecs = [];
+  const key = specKey(size, note);
+  if(!mat.knownSpecs.some(s => specKey(s.size, s.note) === key)){
+    mat.knownSpecs.push({ size, note: (note||'').trim() });
+  }
+}
+
+// 開封一個整包：從 batches 移出一包，變成 openBatches 中「同規格/品牌」的拆封中記錄
+function openOnePackage(mat, batch){
+  batch.count -= 1;
+  const key = specKey(batch.size, batch.note);
+  if(!mat.openBatches) mat.openBatches = [];
+  const existing = mat.openBatches.find(o => specKey(o.size, o.note) === key);
+  if(existing){ existing.remaining = round2(existing.remaining + batch.size); }
+  else { mat.openBatches.push({ id:uid(), size:batch.size, note:batch.note, remaining:batch.size }); }
+}
+
+// 通用消耗邏輯：依序扣「拆封中庫存」，不夠時依先進先出拆開整包；全部用完仍不足時，
+// 不會出現負數，剩餘缺口記錄進 mat.pendingShortage（缺貨待補）。
 function consumeFromBatches(mat, amount){
-  mat.openStock = round2((mat.openStock || 0) - round2(amount));
-  while(mat.openStock < 0 && (mat.batches || []).some(b => b.count > 0)){
+  let remain = round2(amount);
+  if(!mat.openBatches) mat.openBatches = [];
+  for(const ob of mat.openBatches){
+    if(remain <= 0) break;
+    const take = Math.min(ob.remaining, remain);
+    ob.remaining = round2(ob.remaining - take);
+    remain = round2(remain - take);
+  }
+  mat.openBatches = mat.openBatches.filter(o => o.remaining > 0);
+  while(remain > 0 && (mat.batches || []).some(b => b.count > 0)){
     const nextBatch = mat.batches.find(b => b.count > 0);
     if(!nextBatch) break;
-    nextBatch.count -= 1;
-    mat.openStock = round2(mat.openStock + nextBatch.size);
+    openOnePackage(mat, nextBatch);
+    const ob = mat.openBatches.find(o => specKey(o.size, o.note) === specKey(nextBatch.size, nextBatch.note));
+    const take = Math.min(ob.remaining, remain);
+    ob.remaining = round2(ob.remaining - take);
+    remain = round2(remain - take);
   }
+  mat.openBatches = (mat.openBatches || []).filter(o => o.remaining > 0);
   mat.batches = (mat.batches || []).filter(b => b.count > 0);
+  if(remain > 0){ mat.pendingShortage = round2((mat.pendingShortage || 0) + remain); }
   recalcMaterialStock(mat);
 }
-// 進貨：將新批次合併進現有相同規格＋備註的批次，否則新增一筆批次
+// 依使用者指定的批次（可複選、可指定數量）扣庫存：先扣拆封中庫存，不足時依使用者選擇的批次清單逐一拆包
+function consumeFromChosenBatches(mat, amount, choices){
+  // choices: [{ batchId, count }]
+  let remain = round2(amount);
+  if(!mat.openBatches) mat.openBatches = [];
+  for(const ob of mat.openBatches){
+    if(remain <= 0) break;
+    const take = Math.min(ob.remaining, remain);
+    ob.remaining = round2(ob.remaining - take);
+    remain = round2(remain - take);
+  }
+  mat.openBatches = mat.openBatches.filter(o => o.remaining > 0);
+  for(const choice of (choices || [])){
+    const batch = (mat.batches||[]).find(b => b.id === choice.batchId);
+    if(!batch) continue;
+    let toOpen = Math.min(choice.count, batch.count);
+    for(let i=0; i<toOpen && remain > 0; i++){
+      openOnePackage(mat, batch);
+      const ob = mat.openBatches.find(o => specKey(o.size, o.note) === specKey(batch.size, batch.note));
+      const take = Math.min(ob.remaining, remain);
+      ob.remaining = round2(ob.remaining - take);
+      remain = round2(remain - take);
+    }
+  }
+  mat.openBatches = (mat.openBatches || []).filter(o => o.remaining > 0);
+  mat.batches = (mat.batches || []).filter(b => b.count > 0);
+  if(remain > 0){ mat.pendingShortage = round2((mat.pendingShortage || 0) + remain); }
+  recalcMaterialStock(mat);
+}
+// 進貨：將新批次合併進現有相同規格＋品牌的批次，否則新增一筆批次；並記住此規格供下次快速選取。
+// 若此原物料目前有「缺貨待補」的欠帳，會優先自動用這批新貨扣抵，其餘才算入正式庫存。
 function addBatchToMaterial(mat, size, count, note){
   if(!mat.batches) mat.batches = [];
-  const key = (note||'').trim().toLowerCase();
-  const existing = mat.batches.find(b => b.size === size && (b.note||'').trim().toLowerCase() === key);
+  rememberSpec(mat, size, note);
+  const key = specKey(size, note);
+  const existing = mat.batches.find(b => specKey(b.size, b.note) === key);
   if(existing){ existing.count += count; }
   else { mat.batches.push({ id:uid(), size, count, note: (note||'').trim() }); }
   recalcMaterialStock(mat);
+  settlePendingShortage(mat);
 }
-// 依使用者指定的批次扣庫存：先扣拆封中庫存，不足時只從使用者選定的那個批次拆包（而非自動先進先出）
-function consumeFromChosenBatch(mat, amount, batchId){
-  mat.openStock = round2((mat.openStock || 0) - round2(amount));
-  while(mat.openStock < 0){
-    const batch = (mat.batches||[]).find(b => b.id === batchId && b.count > 0);
-    if(!batch) break;
-    batch.count -= 1;
-    mat.openStock = round2(mat.openStock + batch.size);
+// 進貨後自動優先扣抵先前的缺貨欠帳
+function settlePendingShortage(mat){
+  if(!mat.pendingShortage || mat.pendingShortage <= 0) return 0;
+  const settle = Math.min(mat.pendingShortage, mat.stock);
+  if(settle > 0){
+    consumeFromBatches(mat, settle);
+    mat.pendingShortage = round2(mat.pendingShortage - settle);
   }
-  mat.batches = (mat.batches || []).filter(b => b.count > 0);
-  recalcMaterialStock(mat);
+  return settle;
 }
 function materialById(id){ return materials.find(m => m.id === id); }
 function productById(id){ return products.find(p => p.id === id); }
+function materialCategories(){
+  const set = new Set(materials.map(m => m.category).filter(Boolean));
+  return [...set].sort((a,b)=>a.localeCompare('zh-Hant'));
+}
 function materialStatus(mat){
+  if((mat.pendingShortage||0) > 0) return { level:'danger', label:`缺貨（欠 ${fmtNum(mat.pendingShortage)}${mat.unit}）` };
   if(mat.stock <= 0) return { level:'danger', label:'已缺貨' };
   if(mat.safetyStock > 0 && mat.stock < mat.safetyStock) return { level:'warn', label:'庫存偏低' };
   return { level:'ok', label:'庫存充足' };
@@ -864,27 +1063,49 @@ function switchTab(tab){
    MATERIALS：原物料 CRUD
 ========================================================= */
 function materialUsageCount(materialId){
-  return products.filter(p => p.ingredients.some(i => i.materialId === materialId)).length;
+  return products.filter(p => (p.recipes||[]).some(r => r.ingredients.some(i => i.materialId === materialId))).length;
 }
 
 function renderMaterials(){
+  renderMaterialCategoryFilter();
   const box = $('#materials-table');
+  const catFilter = $('#m-filter-category') ? $('#m-filter-category').value : 'all';
+  const textFilter = $('#m-filter-text') ? $('#m-filter-text').value.trim().toLowerCase() : '';
+
   if(materials.length === 0){
     box.innerHTML = `<div class="empty"><div class="big">🧺</div>尚未建立任何原物料<br>點選右上角「新增原物料」開始建立庫存清單</div>`;
     return;
   }
-  const rows = materials.map(m => {
+
+  let list = materials.filter(m => {
+    if(catFilter !== 'all' && (m.category||'未分類') !== catFilter) return false;
+    if(textFilter && !(m.name.toLowerCase().includes(textFilter) || (m.note||'').toLowerCase().includes(textFilter))) return false;
+    return true;
+  });
+
+  if(list.length === 0){
+    box.innerHTML = `<div class="empty">沒有符合篩選條件的原物料</div>`;
+    return;
+  }
+
+  function materialRowHTML(m){
     const st = materialStatus(m);
     const isPkg = m.trackByPackage;
     const batches = isPkg ? (m.batches || []).filter(b => b.count > 0) : [];
+    const openBatches = isPkg ? (m.openBatches || []).filter(o => o.remaining > 0) : [];
     let stockCellHTML;
     if(isPkg){
       const batchLines = batches.length
         ? batches.map(b => `<div>${fmtNum(b.size)}${esc(m.unit)} × <strong>${fmtNum(b.count)}</strong> ${esc(m.packageUnit||'包')}${b.note?` <span class="batch-tag">${esc(b.note)}</span>`:''}</div>`).join('')
         : `<div class="log-detail">尚無整包庫存</div>`;
-      const openLine = `<div class="log-detail" style="margin-top:4px;">拆封中：${fmtNum(m.openStock||0)}${esc(m.unit)}<span class="ref-tag">參考</span></div>`;
+      const openLines = openBatches.length
+        ? openBatches.map(o => `<div class="log-detail">拆封中：${fmtNum(o.remaining)}${esc(m.unit)}${o.note?` <span class="batch-tag">${esc(o.note)}</span>`:''}<span class="ref-tag">參考</span></div>`).join('')
+        : `<div class="log-detail">拆封中：無</div>`;
+      const shortageLine = (m.pendingShortage||0) > 0
+        ? `<div class="log-detail" style="color:var(--danger);font-weight:700;">⚠ 缺貨待補：${fmtNum(m.pendingShortage)}${esc(m.unit)}（下次進貨會自動扣抵）</div>`
+        : '';
       const totalLine = `<div class="log-detail">合計 ${fmtNum(m.stock)}${esc(m.unit)}</div>`;
-      stockCellHTML = `${batchLines}${openLine}${totalLine}`;
+      stockCellHTML = `${batchLines}${openLines}${shortageLine}${totalLine}`;
     } else {
       stockCellHTML = `${fmtNum(m.stock)}`;
     }
@@ -899,91 +1120,123 @@ function renderMaterials(){
           <button class="btn btn-outline btn-sm" data-act="in">進貨</button>
           <button class="btn btn-outline btn-sm" data-act="out">出庫</button>
           <button class="btn btn-outline btn-sm" data-act="adjust">盤點</button>
+          <button class="btn btn-ghost btn-sm" data-act="dup" title="複製此原物料設定">複製</button>
           <button class="btn btn-ghost btn-sm" data-act="edit">編輯</button>
           <button class="btn btn-ghost btn-sm" data-act="delete" style="color:var(--danger);">刪除</button>
         </div>
       </td>
     </tr>`;
-  }).join('');
-  box.innerHTML = `<table class="responsive-table">
-    <thead><tr><th>名稱</th><th>單位</th><th>目前庫存</th><th>安全庫存</th><th>狀態</th><th style="width:280px;">操作</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  }
+
+  // 依分類分組顯示（大項分類，例如麵粉類／糖類／調味粉類…）
+  const groups = {};
+  list.forEach(m => { const c = m.category || '未分類'; (groups[c] = groups[c] || []).push(m); });
+  const catNames = Object.keys(groups).sort((a,b)=> a==='未分類'?1:(b==='未分類'?-1:a.localeCompare(b,'zh-Hant')));
+
+  box.innerHTML = catNames.map(cat => `
+    <div class="material-group">
+      <div class="material-group-head">${esc(cat)}<span class="material-group-count">${groups[cat].length} 項</span></div>
+      <table class="responsive-table">
+        <thead><tr><th>名稱</th><th>單位</th><th>目前庫存</th><th>安全庫存</th><th>狀態</th><th style="width:320px;">操作</th></tr></thead>
+        <tbody>${groups[cat].map(materialRowHTML).join('')}</tbody>
+      </table>
+    </div>
+  `).join('');
 
   $$('#materials-table tbody tr').forEach(tr => {
     const id = tr.dataset.id;
     tr.querySelector('[data-act=in]').addEventListener('click', () => openStockModal(id, 'in'));
     tr.querySelector('[data-act=out]').addEventListener('click', () => openStockModal(id, 'out'));
     tr.querySelector('[data-act=adjust]').addEventListener('click', () => openStockModal(id, 'adjust'));
+    tr.querySelector('[data-act=dup]').addEventListener('click', () => openMaterialForm(null, id));
     tr.querySelector('[data-act=edit]').addEventListener('click', () => openMaterialForm(id));
     tr.querySelector('[data-act=delete]').addEventListener('click', () => confirmDeleteMaterial(id));
   });
 }
 
+function renderMaterialCategoryFilter(){
+  const sel = $('#m-filter-category');
+  if(!sel) return;
+  const prev = sel.value;
+  const cats = materialCategories();
+  const hasUncat = materials.some(m => !m.category);
+  sel.innerHTML = `<option value="all">全部分類</option>` + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('') + (hasUncat ? `<option value="未分類">未分類</option>` : '');
+  if([...sel.options].some(o=>o.value===prev)) sel.value = prev;
+}
+
 // 用於「整包批次」動態列表（新增原物料初始批次 / 盤點編輯批次）
-function addBatchRow(container, size='', count='', note=''){
+function addBatchRow(container, size='', count='', note='', openRemaining=''){
   const row = document.createElement('div');
   row.className = 'batch-row';
   row.innerHTML = `
     <input type="number" class="batch-size" min="0" step="any" placeholder="每包重量">
-    <input type="number" class="batch-count" min="0" step="1" placeholder="包數">
-    <input type="text" class="batch-note" placeholder="廠商／備註（選填）">
+    <input type="number" class="batch-count" min="0" step="1" placeholder="未拆封包數">
+    <input type="number" class="batch-open" min="0" step="any" placeholder="拆封中庫存">
+    <input type="text" class="batch-note" placeholder="廠商／品牌備註（選填）">
     <button type="button" class="rm-btn" title="移除">✕</button>
   `;
   row.querySelector('.batch-size').value = size;
   row.querySelector('.batch-count').value = count;
+  row.querySelector('.batch-open').value = openRemaining;
   row.querySelector('.batch-note').value = note;
   row.querySelector('.rm-btn').addEventListener('click', () => row.remove());
   container.appendChild(row);
 }
 
-function openMaterialForm(editId){
+function openMaterialForm(editId, duplicateFromId){
   const editing = editId ? materialById(editId) : null;
-  const trackByPackage = editing ? !!editing.trackByPackage : false;
+  const dupSource = duplicateFromId ? materialById(duplicateFromId) : null;
+  const prefill = editing || dupSource; // 編輯時用原資料；複製時用來源資料預填（但不帶庫存數字）
+  const trackByPackage = prefill ? !!prefill.trackByPackage : false;
+  const isDup = !!dupSource && !editing;
+
   const body = `
+    ${isDup ? `<div class="field-help" style="background:var(--accent-soft);color:var(--accent-dark);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-weight:700;">📋 已複製「${esc(dupSource.name)}」的設定，請修改名稱與庫存數量後儲存為新原物料</div>` : ''}
     <div class="field">
       <label>原物料名稱</label>
-      <input type="text" id="f-name" placeholder="例如：中筋麵粉" value="${editing ? esc(editing.name) : ''}">
+      <input type="text" id="f-name" placeholder="例如：中筋麵粉" value="${isDup ? esc(prefill.name + '（複製）') : (editing ? esc(editing.name) : '')}">
     </div>
     <div class="field-row">
       <div class="field">
-        <label>基礎計量單位<span class="field-help" style="display:inline;">（配方與精確消耗用）</span></label>
-        <input type="text" id="f-unit" placeholder="g / ml / 顆" value="${editing ? esc(editing.unit) : ''}">
+        <label>大項分類（選填，例如：麵粉類、調味粉類、糖類）</label>
+        <input type="text" id="f-category" list="m-category-list" placeholder="例如：麵粉類" value="${prefill ? esc(prefill.category||'') : ''}">
+        <datalist id="m-category-list">${materialCategories().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
       </div>
       <div class="field">
-        <label>安全庫存（基礎單位，可留 0）</label>
-        <input type="number" id="f-safety-base" min="0" step="any" value="${editing ? editing.safetyStock : 0}">
+        <label>基礎計量單位<span class="field-help" style="display:inline;">（配方與精確消耗用）</span></label>
+        <input type="text" id="f-unit" placeholder="g / ml / 顆" value="${prefill ? esc(prefill.unit) : ''}">
       </div>
+    </div>
+    <div class="field">
+      <label>安全庫存（基礎單位，可留 0）</label>
+      <input type="number" id="f-safety-base" min="0" step="any" value="${prefill ? prefill.safetyStock : 0}">
     </div>
 
     <div class="field" style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
       <label class="checkline" style="margin-bottom:0;">
         <input type="checkbox" id="f-track-pkg" ${trackByPackage?'checked':''}>
-        以「整包」方式管理庫存（適合麵粉、砂糖等袋裝原料，可同時存在不同重量的包裝）
+        以「整包」方式管理庫存（適合麵粉、砂糖等袋裝原料，可同時存在不同品牌／規格的包裝）
       </label>
-      <div class="field-help" style="margin-top:6px;">開啟後，原物料庫存畫面會分別列出每種包裝規格（例如 200g、350g）各有幾包；已拆封的零散庫存會單獨顯示為參考值，盤點時不需要每次秤重。</div>
+      <div class="field-help" style="margin-top:6px;">開啟後，原物料庫存畫面會依規格＋品牌分別列出未拆封包數與拆封中庫存，盤點時不需要每次秤重。</div>
       <div id="pkg-fields" style="margin-top:12px;display:${trackByPackage?'block':'none'};">
         <div class="field">
           <label>包裝單位名稱</label>
-          <input type="text" id="f-pkg-unit" placeholder="包 / 袋 / 箱" value="${editing && editing.packageUnit ? esc(editing.packageUnit) : '包'}">
+          <input type="text" id="f-pkg-unit" placeholder="包 / 袋 / 箱" value="${prefill && prefill.packageUnit ? esc(prefill.packageUnit) : '包'}">
         </div>
       </div>
     </div>
 
-    ${!editing ? `
+    ${(!editing) ? `
     <div id="initial-stock-plain" class="field" style="display:${trackByPackage?'none':'block'};">
       <label>初始庫存（基礎單位）</label>
       <input type="number" id="f-stock" min="0" step="any" value="0">
     </div>
     <div id="initial-stock-pkg" style="display:${trackByPackage?'block':'none'};">
       <div class="field">
-        <label>初始整包庫存（可依規格分別新增，例如 200g、350g）</label>
+        <label>初始庫存（可依規格／品牌分別新增，例如 200g 大成、350g 福源）</label>
+        <div class="batch-row-labels"><span>每包重量</span><span>未拆封包數</span><span>拆封中庫存</span><span>品牌／備註</span><span></span></div>
         <div id="init-batch-rows"></div>
         <button type="button" class="btn btn-outline btn-sm" id="btn-add-batch">＋ 新增規格</button>
-      </div>
-      <div class="field">
-        <label>另有拆封中庫存（選填，目前已開封還剩的量）</label>
-        <input type="number" id="f-init-open" min="0" step="any" value="0">
       </div>
     </div>` : ''}
 
@@ -993,12 +1246,13 @@ function openMaterialForm(editId){
     </div>
   `;
   openModal({
-    title: editing ? '編輯原物料' : '新增原物料',
+    title: editing ? '編輯原物料' : (isDup ? '複製原物料' : '新增原物料'),
     wide:true,
     bodyHTML: body,
     confirmText: editing ? '儲存變更' : '新增',
     onMount:(box)=>{
       $('#f-name', box).focus();
+      $('#f-name', box).select();
       const rowsBox = $('#init-batch-rows', box);
       if(rowsBox){
         addBatchRow(rowsBox);
@@ -1019,51 +1273,55 @@ function openMaterialForm(editId){
       const unit = $('#f-unit', box).value.trim();
       if(!name){ showToast('請輸入原物料名稱', 'error'); return false; }
       if(!unit){ showToast('請輸入基礎計量單位', 'error'); return false; }
-      if(!editing && materials.some(m=>m.name===name)){ showToast('已存在同名原物料', 'error'); return false; }
+      if((!editing) && materials.some(m=>m.name===name)){ showToast('已存在同名原物料', 'error'); return false; }
 
+      const category = $('#f-category', box).value.trim();
       const trackByPackage = $('#f-track-pkg', box).checked;
       const packageUnit = trackByPackage ? ($('#f-pkg-unit', box).value.trim() || '包') : '';
       const safetyBase = parseFloat($('#f-safety-base', box).value) || 0;
 
       if(editing){
         const wasTracked = !!editing.trackByPackage;
-        editing.name = name; editing.unit = unit; editing.safetyStock = safetyBase;
+        editing.name = name; editing.unit = unit; editing.safetyStock = safetyBase; editing.category = category;
         editing.trackByPackage = trackByPackage;
         if(trackByPackage) editing.packageUnit = packageUnit;
         if(trackByPackage && !wasTracked){
-          // 從一般管理切換為整包管理：先把目前總庫存視為「拆封中庫存」，之後可透過進貨/盤點分配到各規格批次
+          // 從一般管理切換為整包管理：先把目前總庫存視為「拆封中庫存（未分品牌）」，之後可透過進貨/盤點分配到各規格批次
           editing.batches = editing.batches && editing.batches.length ? editing.batches : [];
-          editing.openStock = round2(editing.stock - batchesTotal(editing));
+          editing.openBatches = editing.stock > 0 ? [{ id:uid(), size:editing.stock, note:'', remaining:editing.stock }] : [];
         }
         editing.note = $('#f-note', box).value.trim(); editing.updatedAt = Date.now();
-        addLog({ type:'material', title:`編輯原物料「${name}」`, note:'更新名稱／單位／安全庫存／包裝設定／備註', details:[] });
+        addLog({ type:'material', title:`編輯原物料「${name}」`, note:'更新名稱／分類／單位／安全庫存／包裝設定／備註', details:[] });
         showToast('已儲存變更', 'success');
       } else {
-        let stock = 0, stockNote = '', batches = [], openStock = 0;
+        let stock = 0, stockNote = '', batches = [], openBatches = [], knownSpecs = [];
         if(trackByPackage){
           $$('.batch-row', box).forEach(row => {
             const size = parseFloat(row.querySelector('.batch-size').value);
-            const count = parseInt(row.querySelector('.batch-count').value);
+            const count = parseInt(row.querySelector('.batch-count').value) || 0;
+            const openAmt = parseFloat(row.querySelector('.batch-open').value) || 0;
             const note = row.querySelector('.batch-note').value.trim();
-            if(!isNaN(size) && size > 0 && !isNaN(count) && count > 0){
-              batches.push({ id:uid(), size, count, note });
+            if(!isNaN(size) && size > 0 && (count > 0 || openAmt > 0)){
+              if(count > 0) batches.push({ id:uid(), size, count, note });
+              if(openAmt > 0) openBatches.push({ id:uid(), size, note, remaining:openAmt });
+              knownSpecs.push({ size, note });
             }
           });
-          openStock = parseFloat($('#f-init-open', box).value) || 0;
-          stock = round2(openStock + batches.reduce((s,b)=>s+b.size*b.count,0));
-          const batchDesc = batches.map(b=>`${fmtNum(b.size)}${unit}×${b.count}${packageUnit}`).join('、') || '無整包';
-          stockNote = `初始庫存共 ${fmtNum(stock)} ${unit}（${batchDesc}${openStock>0?`，另有拆封中 ${fmtNum(openStock)}${unit}`:''}）`;
+          stock = round2(openBatches.reduce((s,o)=>s+o.remaining,0) + batches.reduce((s,b)=>s+b.size*b.count,0));
+          const batchDesc = batches.map(b=>`${fmtNum(b.size)}${unit}×${b.count}${packageUnit}${b.note?`(${b.note})`:''}`).join('、') || '無整包';
+          const openDesc = openBatches.map(o=>`${fmtNum(o.remaining)}${unit}${o.note?`(${o.note})`:''}`).join('、');
+          stockNote = `初始庫存共 ${fmtNum(stock)} ${unit}（${batchDesc}${openDesc?`，拆封中：${openDesc}`:''}）`;
         } else {
           stock = parseFloat($('#f-stock', box).value) || 0;
           stockNote = `初始庫存 ${fmtNum(stock)} ${unit}`;
         }
         const nm = {
-          id:uid(), name, unit, stock, safetyStock:safetyBase,
-          trackByPackage, packageUnit, batches, openStock,
+          id:uid(), name, unit, stock, safetyStock:safetyBase, category,
+          trackByPackage, packageUnit, batches, openBatches, knownSpecs, pendingShortage:0,
           note:$('#f-note', box).value.trim(), updatedAt:Date.now()
         };
         materials.push(nm);
-        addLog({ type:'material', title:`新增原物料「${name}」`, note:stockNote, details:[] });
+        addLog({ type:'material', title:`新增原物料「${name}」${isDup?`（複製自「${dupSource.name}」）`:''}`, note:stockNote, details:[] });
         showToast('已新增原物料', 'success');
       }
       persist(); renderAll();
@@ -1072,14 +1330,24 @@ function openMaterialForm(editId){
 }
 
 // 產生「目前庫存」摘要 HTML（各規格批次 + 拆封中庫存），用於彈窗頂部提示
+// 產生「目前庫存」摘要 HTML（各規格批次 + 依品牌區分的拆封中庫存 + 缺貨提示）
 function stockSummaryHTML(mat){
   const batches = (mat.batches || []).filter(b => b.count > 0);
+  const openBatches = (mat.openBatches || []).filter(o => o.remaining > 0);
   const lines = batches.map(b => `<div>${fmtNum(b.size)}${esc(mat.unit)} × <strong>${fmtNum(b.count)}</strong> ${esc(mat.packageUnit||'包')}${b.note?` <span class="batch-tag">${esc(b.note)}</span>`:''}</div>`).join('')
     || `<div style="color:var(--ink-soft);">目前尚無整包庫存</div>`;
+  const openLines = openBatches.length
+    ? openBatches.map(o => `<div class="log-detail">拆封中：${fmtNum(o.remaining)}${esc(mat.unit)}${o.note?` <span class="batch-tag">${esc(o.note)}</span>`:''}</div>`).join('')
+    : `<div class="log-detail">拆封中：無</div>`;
+  const shortageLine = (mat.pendingShortage||0) > 0
+    ? `<div class="log-detail" style="color:var(--danger);font-weight:700;margin-top:4px;">⚠ 目前缺貨待補：${fmtNum(mat.pendingShortage)}${esc(mat.unit)}（本次進貨會自動優先扣抵）</div>`
+    : '';
   return `<div class="modal-msg" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-bottom:16px;">
     <div style="font-weight:700;font-size:12px;color:var(--ink-soft);margin-bottom:6px;">目前庫存</div>
     ${lines}
-    <div class="log-detail" style="margin-top:6px;">拆封中：${fmtNum(mat.openStock||0)}${esc(mat.unit)}<span class="ref-tag">參考</span>　｜　合計 ${fmtNum(mat.stock)}${esc(mat.unit)}</div>
+    ${openLines}
+    ${shortageLine}
+    <div class="log-detail" style="margin-top:6px;">合計 ${fmtNum(mat.stock)}${esc(mat.unit)}</div>
   </div>`;
 }
 
@@ -1091,8 +1359,17 @@ function openStockModal(materialId, mode){
 
   let body;
   if(isPkg && mode === 'in'){
+    const specs = mat.knownSpecs || [];
+    const specOptions = specs.map((s,i) => `<option value="${i}">${fmtNum(s.size)}${esc(mat.unit)}／包${s.note?`　${esc(s.note)}`:''}</option>`).join('');
     body = `
       ${stockSummaryHTML(mat)}
+      ${specs.length ? `<div class="field">
+        <label>快速選擇已有規格<span class="field-help" style="display:inline;">（不用重新輸入品牌與重量）</span></label>
+        <select id="f-spec-select">
+          <option value="">— 手動輸入新規格 —</option>
+          ${specOptions}
+        </select>
+      </div>` : ''}
       <div class="field-row">
         <div class="field">
           <label>每包重量（${esc(mat.unit)}）</label>
@@ -1104,10 +1381,10 @@ function openStockModal(materialId, mode){
         </div>
       </div>
       <div class="field">
-        <label>廠商／批次備註（選填）</label>
+        <label>廠商／品牌備註（選填）</label>
         <input type="text" id="f-batch-note" placeholder="例如：大成製粉">
       </div>
-      <div class="field-help" style="margin-top:-6px;margin-bottom:14px;">相同重量＋相同備註會自動合併為同一批次；重量或備註不同則會分開列示。</div>
+      <div class="field-help" style="margin-top:-6px;margin-bottom:14px;">相同重量＋相同品牌會自動合併為同一批次；重量或品牌不同則會分開列示，方便日後個別追蹤。</div>
     `;
   } else if(isPkg && mode === 'out'){
     const batchOptions = (mat.batches||[]).filter(b=>b.count>0)
@@ -1146,14 +1423,10 @@ function openStockModal(materialId, mode){
     body = `
       ${stockSummaryHTML(mat)}
       <div class="field">
-        <label>整包庫存（依規格分別盤點包數）</label>
+        <label>依規格／品牌分別盤點（未拆封包數＋拆封中庫存）</label>
+        <div class="batch-row-labels"><span>每包重量</span><span>未拆封包數</span><span>拆封中庫存</span><span>品牌／備註</span><span></span></div>
         <div id="adj-batch-rows"></div>
         <button type="button" class="btn btn-outline btn-sm" id="btn-add-batch">＋ 新增規格</button>
-      </div>
-      <div class="field" style="margin-top:14px;">
-        <label>拆封中庫存（${esc(mat.unit)}）</label>
-        <input type="number" id="f-open" min="0" step="any" value="${mat.openStock||0}">
-        <div class="field-help">這是目前已拆封、正在使用中的剩餘量，系統會自動估算並帶入這裡；如果您已經實際秤重，可以直接修改這個數字。</div>
       </div>
       <div class="field">
         <label>調整原因（選填）</label>
@@ -1193,10 +1466,29 @@ function openStockModal(materialId, mode){
     onMount:(box)=>{
       if(isPkg && mode === 'adjust'){
         const rowsBox = $('#adj-batch-rows', box);
-        const existing = (mat.batches||[]);
-        if(existing.length){ existing.forEach(b => addBatchRow(rowsBox, b.size, b.count, b.note)); }
-        else { addBatchRow(rowsBox); }
+        // 把目前的整包批次與拆封中庫存，依「規格＋品牌」合併成同一列，方便逐一核對調整
+        const keys = [];
+        (mat.batches||[]).forEach(b => { const k=specKey(b.size,b.note); if(!keys.includes(k)) keys.push(k); });
+        (mat.openBatches||[]).forEach(o => { const k=specKey(o.size,o.note); if(!keys.includes(k)) keys.push(k); });
+        if(keys.length){
+          keys.forEach(k => {
+            const b = (mat.batches||[]).find(x=>specKey(x.size,x.note)===k);
+            const o = (mat.openBatches||[]).find(x=>specKey(x.size,x.note)===k);
+            addBatchRow(rowsBox, b?b.size:o.size, b?b.count:0, (b?b.note:o.note)||'', o?o.remaining:0);
+          });
+        } else {
+          addBatchRow(rowsBox);
+        }
         $('#btn-add-batch', box).addEventListener('click', ()=> addBatchRow(rowsBox));
+      }
+      if(isPkg && mode === 'in'){
+        const specSelect = $('#f-spec-select', box);
+        specSelect?.addEventListener('change', () => {
+          const idx = specSelect.value;
+          if(idx === ''){ return; }
+          const spec = (mat.knownSpecs||[])[idx];
+          if(spec){ $('#f-size', box).value = spec.size; $('#f-batch-note', box).value = spec.note || ''; }
+        });
       }
       if(isPkg && mode === 'out'){
         const wholeBtn = $('#btn-out-whole', box), looseBtn = $('#btn-out-loose', box);
@@ -1212,7 +1504,7 @@ function openStockModal(materialId, mode){
         looseBtn.addEventListener('click', ()=> setOutMode('loose'));
         setOutMode('whole');
       }
-      ($('#f-qty', box) || $('#f-size', box) || $('#f-open', box))?.focus();
+      ($('#f-qty', box) || $('#f-size', box))?.focus();
     },
     onConfirm:(box)=>{
       const note = $('#f-note', box)?.value.trim() || '';
@@ -1223,14 +1515,16 @@ function openStockModal(materialId, mode){
         const batchNote = $('#f-batch-note', box).value.trim();
         if(isNaN(size) || size <= 0){ showToast('請輸入大於 0 的每包重量', 'error'); return false; }
         if(isNaN(count) || count <= 0){ showToast('請輸入大於 0 的進貨包數', 'error'); return false; }
+        const hadShortage = mat.pendingShortage || 0;
         addBatchToMaterial(mat, size, count, batchNote);
         const grams = round2(size * count);
         mat.updatedAt = Date.now();
+        const settled = hadShortage - (mat.pendingShortage || 0);
         addLog({ type:'in', materialId:mat.id, materialName:mat.name, qtyChange:grams, stockAfter:mat.stock,
           title:`進貨入庫「${mat.name}」`,
-          note:`${count} ${mat.packageUnit||'包'} × ${fmtNum(size)}${mat.unit} = ${fmtNum(grams)}${mat.unit}${batchNote?`（${batchNote}）`:''}`,
+          note:`${count} ${mat.packageUnit||'包'} × ${fmtNum(size)}${mat.unit} = ${fmtNum(grams)}${mat.unit}${batchNote?`（${batchNote}）`:''}${settled>0?`；已自動扣抵先前缺貨 ${fmtNum(settled)}${mat.unit}`:''}`,
           details:[] });
-        showToast('已完成進貨入庫', 'success');
+        showToast(settled>0 ? `已完成進貨，並自動補上先前缺貨的 ${fmtNum(settled)}${mat.unit}` : '已完成進貨入庫', 'success');
       } else if(isPkg && mode === 'out'){
         const outMode = box.dataset.outmode || 'whole';
         if(outMode === 'whole'){
@@ -1260,25 +1554,27 @@ function openStockModal(materialId, mode){
           showToast('已完成領料出庫', 'success');
         }
       } else if(isPkg && mode === 'adjust'){
-        const newBatches = [];
+        const newBatches = [], newOpenBatches = [];
         $$('.batch-row', box).forEach(row => {
           const size = parseFloat(row.querySelector('.batch-size').value);
-          const count = parseInt(row.querySelector('.batch-count').value);
+          const count = parseInt(row.querySelector('.batch-count').value) || 0;
+          const openAmt = parseFloat(row.querySelector('.batch-open').value) || 0;
           const bnote = row.querySelector('.batch-note').value.trim();
-          if(!isNaN(size) && size > 0 && !isNaN(count) && count > 0){
-            newBatches.push({ id:uid(), size, count, note:bnote });
-          }
+          if(isNaN(size) || size <= 0) return;
+          if(openAmt < 0){ return; }
+          if(count > 0) newBatches.push({ id:uid(), size, count, note:bnote });
+          if(openAmt > 0) newOpenBatches.push({ id:uid(), size, note:bnote, remaining:openAmt });
         });
-        const newOpen = parseFloat($('#f-open', box).value);
-        if(isNaN(newOpen) || newOpen < 0){ showToast('拆封中庫存不可為負數', 'error'); return false; }
         const oldStock = mat.stock;
-        mat.batches = newBatches; mat.openStock = newOpen;
+        mat.batches = newBatches; mat.openBatches = newOpenBatches;
+        newBatches.concat(newOpenBatches).forEach(b => rememberSpec(mat, b.size, b.note));
         recalcMaterialStock(mat); mat.updatedAt = Date.now();
         const diff = round2(mat.stock - oldStock);
         const summary = newBatches.map(b=>`${fmtNum(b.size)}${mat.unit}×${b.count}${mat.packageUnit||'包'}${b.note?`(${b.note})`:''}`).join('、') || '無整包';
+        const openSummary = newOpenBatches.map(o=>`${fmtNum(o.remaining)}${mat.unit}${o.note?`(${o.note})`:''}`).join('、') || '無';
         addLog({ type:'adjust', materialId:mat.id, materialName:mat.name, qtyChange:diff, stockAfter:mat.stock,
           title:`盤點調整「${mat.name}」`,
-          note:`${note?note+'；':''}整包：${summary}；拆封中：${fmtNum(newOpen)}${mat.unit}`,
+          note:`${note?note+'；':''}整包：${summary}；拆封中：${openSummary}`,
           details:[] });
         showToast('已完成盤點調整', 'success');
       } else if(mode === 'adjust'){
@@ -1354,6 +1650,48 @@ function addIngredientRow(container, materialId='', qty=''){
   container.appendChild(row);
 }
 
+function recipeTypeLabel(type){
+  return type === 'flavor' ? '口味調整配方' : (type === 'custom' ? '客製化調整配方' : '主配方');
+}
+function recipeTypeBadgeClass(type){
+  return type === 'flavor' ? 'badge-warn' : (type === 'custom' ? 'badge-accent' : 'badge-ok');
+}
+
+// 新增一個「配方版本」區塊（主配方／口味調整配方／客製化調整配方），內含獨立的原物料清單
+function addRecipeBlock(container, recipe){
+  const block = document.createElement('div');
+  block.className = 'recipe-block';
+  const rid = (recipe && recipe.id) || uid();
+  block.dataset.rid = rid;
+  block.innerHTML = `
+    <div class="recipe-block-head">
+      <input type="text" class="recipe-name" placeholder="配方名稱，例如：主配方" value="${recipe?esc(recipe.name||''):''}">
+      <select class="recipe-type">
+        <option value="base">主配方</option>
+        <option value="flavor">口味調整配方</option>
+        <option value="custom">客製化調整配方</option>
+      </select>
+      <button type="button" class="btn btn-ghost btn-sm recipe-remove-btn" style="color:var(--danger);" title="刪除此配方版本">✕ 刪除</button>
+    </div>
+    <div class="ing-rows"></div>
+    <button type="button" class="btn btn-outline btn-sm add-ing-btn" style="margin-top:4px;">＋ 新增材料</button>
+  `;
+  block.querySelector('.recipe-type').value = (recipe && recipe.type) || 'base';
+  const rowsBox = block.querySelector('.ing-rows');
+  const ingredients = (recipe && recipe.ingredients) || [];
+  if(ingredients.length){ ingredients.forEach(i => addIngredientRow(rowsBox, i.materialId, i.qty)); }
+  else { addIngredientRow(rowsBox); }
+  block.querySelector('.add-ing-btn').addEventListener('click', () => addIngredientRow(rowsBox));
+  block.querySelector('.recipe-remove-btn').addEventListener('click', () => {
+    if(container.querySelectorAll('.recipe-block').length <= 1){
+      showToast('至少需保留一個配方版本', 'error'); return;
+    }
+    block.remove();
+  });
+  container.appendChild(block);
+  return block;
+}
+
 function openProductForm(editId){
   const editing = editId ? productById(editId) : null;
   let photos = editing ? getProductPhotos(editing).map(ph => ({ id: ph.id, dataUrl: ph.dataUrl })) : [];
@@ -1366,12 +1704,12 @@ function openProductForm(editId){
     </div>
     <div class="field">
       <label>備註（選填）</label>
-      <input type="text" id="f-pnote" placeholder="例如：配方版本、備註事項" value="${editing?esc(editing.note||''):''}">
+      <input type="text" id="f-pnote" placeholder="例如：系列說明、備註事項" value="${editing?esc(editing.note||''):''}">
     </div>
     <div class="field">
-      <label>所需原物料清單（以「單一份／單一個」產品為基準用量）</label>
-      <div id="ing-rows"></div>
-      <button type="button" class="btn btn-outline btn-sm" id="btn-add-row" style="margin-top:4px;">＋ 新增材料</button>
+      <label>配方版本<span class="field-help" style="display:inline;">（可分別建立主配方、口味調整配方、客製化調整配方，各自獨立的原物料用量）</span></label>
+      <div id="recipes-container"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-add-recipe" style="margin-top:4px;">＋ 新增配方版本</button>
     </div>
 
     <div class="divider"></div>
@@ -1425,13 +1763,17 @@ function openProductForm(editId){
     bodyHTML: body,
     confirmText: editing ? '儲存變更' : '建立配方',
     onMount:(box)=>{
-      const rowsBox = $('#ing-rows', box);
-      if(editing && editing.ingredients.length){
-        editing.ingredients.forEach(i => addIngredientRow(rowsBox, i.materialId, i.qty));
+      const recipesBox = $('#recipes-container', box);
+      const existingRecipes = editing ? (editing.recipes || []) : [];
+      if(existingRecipes.length){
+        existingRecipes.forEach(r => addRecipeBlock(recipesBox, r));
       } else {
-        addIngredientRow(rowsBox);
+        addRecipeBlock(recipesBox, { name:'主配方', type:'base', ingredients:[] });
       }
-      $('#btn-add-row', box).addEventListener('click', () => addIngredientRow(rowsBox));
+      $('#btn-add-recipe', box).addEventListener('click', () => {
+        const count = recipesBox.querySelectorAll('.recipe-block').length;
+        addRecipeBlock(recipesBox, { name: count===0?'主配方':`口味調整配方 ${count}`, type: count===0?'base':'flavor', ingredients:[] });
+      });
       $('#f-pname', box).focus();
 
       const fileInput = $('#f-photo', box);
@@ -1489,18 +1831,26 @@ function openProductForm(editId){
       if(!name){ showToast('請輸入產品名稱', 'error'); return false; }
       if(!editing && products.some(p=>p.name===name)){ showToast('已存在同名產品', 'error'); return false; }
 
-      const rows = $$('.ing-row', box);
-      if(rows.length === 0){ showToast('請至少新增一項所需材料', 'error'); return false; }
-      const ingredients = [];
-      const seen = new Set();
-      for(const row of rows){
-        const mid = row.querySelector('.ing-material').value;
-        const qty = parseFloat(row.querySelector('.ing-qty').value);
-        if(!mid){ showToast('每一列都需要選擇原物料', 'error'); return false; }
-        if(isNaN(qty) || qty <= 0){ showToast('材料用量需大於 0', 'error'); return false; }
-        if(seen.has(mid)){ showToast('同一項原物料重複出現，請合併用量', 'error'); return false; }
-        seen.add(mid);
-        ingredients.push({ materialId:mid, qty });
+      const recipeBlocks = $$('.recipe-block', box);
+      if(recipeBlocks.length === 0){ showToast('請至少建立一個配方版本', 'error'); return false; }
+      const recipes = [];
+      for(const block of recipeBlocks){
+        const rName = block.querySelector('.recipe-name').value.trim() || '未命名配方';
+        const rType = block.querySelector('.recipe-type').value;
+        const rows = block.querySelectorAll('.ing-row');
+        if(rows.length === 0){ showToast(`配方「${rName}」請至少新增一項所需材料`, 'error'); return false; }
+        const ingredients = [];
+        const seen = new Set();
+        for(const row of rows){
+          const mid = row.querySelector('.ing-material').value;
+          const qty = parseFloat(row.querySelector('.ing-qty').value);
+          if(!mid){ showToast(`配方「${rName}」每一列都需要選擇原物料`, 'error'); return false; }
+          if(isNaN(qty) || qty <= 0){ showToast(`配方「${rName}」材料用量需大於 0`, 'error'); return false; }
+          if(seen.has(mid)){ showToast(`配方「${rName}」有重複的原物料，請合併用量`, 'error'); return false; }
+          seen.add(mid);
+          ingredients.push({ materialId:mid, qty });
+        }
+        recipes.push({ id: block.dataset.rid || uid(), name:rName, type:rType, ingredients });
       }
 
       const listPriceRaw = $('#f-listprice', box).value;
@@ -1524,13 +1874,13 @@ function openProductForm(editId){
 
       if(editing){
         editing.name = name; editing.note = $('#f-pnote', box).value.trim();
-        editing.ingredients = ingredients; editing.updatedAt = Date.now();
+        editing.recipes = recipes; editing.updatedAt = Date.now();
         Object.assign(editing, extra);
-        addLog({ type:'product', title:`編輯產品配方「${name}」`, note:`共 ${ingredients.length} 項原物料`, details:[] });
+        addLog({ type:'product', title:`編輯產品配方「${name}」`, note:`共 ${recipes.length} 個配方版本`, details:[] });
         showToast('已儲存配方變更', 'success');
       } else {
-        products.push(Object.assign({ id:uid(), name, note:$('#f-pnote', box).value.trim(), ingredients, updatedAt:Date.now() }, extra));
-        addLog({ type:'product', title:`新增產品配方「${name}」`, note:`共 ${ingredients.length} 項原物料`, details:[] });
+        products.push(Object.assign({ id:uid(), name, note:$('#f-pnote', box).value.trim(), recipes, updatedAt:Date.now() }, extra));
+        addLog({ type:'product', title:`新增產品配方「${name}」`, note:`共 ${recipes.length} 個配方版本`, details:[] });
         showToast('已建立產品配方', 'success');
       }
       persist(); renderAll();
@@ -1600,10 +1950,23 @@ function renderProducts(){
   // ---- 管理檢視（原本的配方管理卡片） ----
   box.className = 'grid grid-2';
   box.innerHTML = products.map(p => {
-    const rows = p.ingredients.map(i => {
-      const m = materialById(i.materialId);
-      if(!m) return `<tr><td colspan="3" style="color:var(--danger);">⚠ 原物料已被刪除</td></tr>`;
-      return `<tr><td>${esc(m.name)}</td><td class="num-cell">${fmtNum(i.qty)}</td><td>${esc(m.unit)}</td></tr>`;
+    const recipes = p.recipes || [];
+    const recipesHTML = recipes.map(r => {
+      const rows = r.ingredients.map(i => {
+        const m = materialById(i.materialId);
+        if(!m) return `<tr><td colspan="3" style="color:var(--danger);">⚠ 原物料已被刪除</td></tr>`;
+        return `<tr><td>${esc(m.name)}</td><td class="num-cell">${fmtNum(i.qty)}</td><td>${esc(m.unit)}</td></tr>`;
+      }).join('');
+      return `<div class="recipe-view-block">
+        <div class="recipe-view-head">
+          <strong>${esc(r.name)}</strong>
+          <span class="badge ${recipeTypeBadgeClass(r.type)}">${recipeTypeLabel(r.type)}</span>
+        </div>
+        <table>
+          <thead><tr><th>原物料</th><th>單位用量</th><th>單位</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
     }).join('');
 
     const priceInline = productPriceHTML(p);
@@ -1620,18 +1983,16 @@ function renderProducts(){
           ${p.note ? `<div class="sub">${esc(p.note)}</div>` : ''}
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <span class="badge badge-accent">${p.ingredients.length} 項原料</span>
+          <span class="badge badge-accent">${recipes.length} 個配方版本</span>
           ${priceInline ? `<div class="price-row">${priceInline}</div>` : ''}
         </div>
       </div>
       <div class="card-body">
         ${infoHTML}
-        <table>
-          <thead><tr><th>原物料</th><th>單位用量</th><th>單位</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+        ${recipesHTML}
         <div class="row-actions" style="margin-top:14px;">
           <button class="btn btn-outline btn-sm" data-act="produce">前往生產試算</button>
+          ${videos.some(v=>(v.productIds||[]).includes(p.id)) ? `<button class="btn btn-outline btn-sm" data-act="videos">🎬 相關教學影片（${videos.filter(v=>(v.productIds||[]).includes(p.id)).length}）</button>` : ''}
           <button class="btn btn-ghost btn-sm" data-act="edit">編輯</button>
           <button class="btn btn-ghost btn-sm" data-act="delete" style="color:var(--danger);">刪除</button>
         </div>
@@ -1645,6 +2006,12 @@ function renderProducts(){
       switchTab('production');
       $('#pr-select').value = id;
       renderProduction();
+    });
+    card.querySelector('[data-act=videos]')?.addEventListener('click', ()=>{
+      switchTab('videos');
+      $('#v-filter-text').value = productById(id).name;
+      $('#v-filter-category').value = 'all';
+      renderVideos();
     });
     card.querySelector('[data-act=edit]').addEventListener('click', () => openProductForm(id));
     card.querySelector('[data-act=delete]').addEventListener('click', () => confirmDeleteProduct(id));
@@ -1748,6 +2115,24 @@ function renderVideoCategoryFilter(){
   if(cats.includes(prev)) sel.value = prev;
 }
 
+// 新增一列「影片段落」（段落名稱 + 影片連結），一個教學影片項目可以有多段連結（例如上集/下集）
+function addVideoSegmentRow(container, label='', url=''){
+  const row = document.createElement('div');
+  row.className = 'segment-row';
+  row.innerHTML = `
+    <input type="text" class="seg-label" placeholder="段落名稱，例如：上集">
+    <input type="text" class="seg-url" placeholder="https://www.youtube.com/watch?v=...">
+    <button type="button" class="rm-btn" title="移除此段落">✕</button>
+  `;
+  row.querySelector('.seg-label').value = label;
+  row.querySelector('.seg-url').value = url;
+  row.querySelector('.rm-btn').addEventListener('click', () => {
+    if(container.querySelectorAll('.segment-row').length <= 1){ showToast('至少需保留一個影片段落', 'error'); return; }
+    row.remove();
+  });
+  container.appendChild(row);
+}
+
 function openVideoForm(editId){
   const editing = editId ? videos.find(v => v.id === editId) : null;
   let thumbData = editing ? (editing.thumbnail || '') : '';
@@ -1758,9 +2143,11 @@ function openVideoForm(editId){
       <input type="text" id="v-title" placeholder="例如：法式馬卡龍殼製作技巧" value="${editing?esc(editing.title):''}">
     </div>
     <div class="field">
-      <label>影片連結（YouTube／雲端硬碟／其他影音平台皆可）</label>
-      <input type="text" id="v-url" placeholder="https://www.youtube.com/watch?v=..." value="${editing?esc(editing.url):''}">
-      <div class="field-help">若貼上 YouTube 連結，卡片會自動顯示影片縮圖，點擊即可直接在頁面內播放。</div>
+      <label>影片段落<span class="field-help" style="display:inline;">（同一個教學可能分好幾段影片，例如上集／下集，可分別貼上連結）</span></label>
+      <div class="batch-row-labels" style="grid-template-columns:140px 1fr 34px;"><span>段落名稱（選填）</span><span>影片連結</span><span></span></div>
+      <div id="v-segments-rows"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-add-segment" style="margin-top:4px;">＋ 新增影片段落</button>
+      <div class="field-help" style="margin-top:6px;">貼上 YouTube 連結的段落，卡片會自動顯示縮圖，點擊即可直接在頁面內播放；其他平台連結則會顯示「前往觀看」。</div>
     </div>
     <div class="field-row">
       <div class="field">
@@ -1774,16 +2161,20 @@ function openVideoForm(editId){
       </div>
     </div>
     <div class="field">
-      <label>自訂縮圖（選填，若不是 YouTube 連結時可上傳一張畫面截圖）</label>
+      <label>自訂封面縮圖（選填，若段落沒有 YouTube 連結時，可上傳一張畫面截圖作為封面）</label>
       <div class="photo-thumb-grid" id="v-thumb-grid"></div>
       <label class="btn btn-outline btn-sm" style="cursor:pointer;display:inline-flex;margin-top:8px;">
         ${thumbData?'更換縮圖':'上傳縮圖'}<input type="file" id="v-thumb-input" accept="image/*" style="display:none;">
       </label>
     </div>
     <div class="field">
+      <label>關聯產品（選填，可對應多個產品，例如通用的打發技巧）</label>
+      <div id="v-product-list" class="video-product-checklist"></div>
+    </div>
+    <div class="field">
       <label>教學重點筆記</label>
-      <textarea id="v-notes" rows="6" placeholder="例如：${'\n'}02:15　攪拌至光滑無顆粒即可，切勿過度攪拌${'\n'}05:40　烘烤前靜置 15 分鐘讓表面結皮${'\n'}08:30　出爐後立即脫模避免回縮">${editing?esc(editing.notes||''):''}</textarea>
-      <div class="field-help">可以搭配時間戳記（例如 02:15）記錄影片中的重點段落，方便之後快速複習。</div>
+      <textarea id="v-notes" rows="6" placeholder="例如：${'\n'}【上集】02:15　攪拌至光滑無顆粒即可，切勿過度攪拌${'\n'}【下集】05:40　烘烤前靜置 15 分鐘讓表面結皮">${editing?esc(editing.notes||''):''}</textarea>
+      <div class="field-help">可以搭配段落名稱＋時間戳記（例如「【上集】02:15」）記錄重點段落，方便之後快速複習。</div>
     </div>
   `;
   openModal({
@@ -1793,6 +2184,12 @@ function openVideoForm(editId){
     confirmText: editing ? '儲存變更' : '新增影片',
     onMount:(box)=>{
       $('#v-title', box).focus();
+      const segRowsBox = $('#v-segments-rows', box);
+      const existingSegments = editing ? (editing.segments || []) : [];
+      if(existingSegments.length){ existingSegments.forEach(s => addVideoSegmentRow(segRowsBox, s.label, s.url)); }
+      else { addVideoSegmentRow(segRowsBox); }
+      $('#btn-add-segment', box).addEventListener('click', () => addVideoSegmentRow(segRowsBox));
+
       const thumbGrid = $('#v-thumb-grid', box);
       const thumbInput = $('#v-thumb-input', box);
       function renderThumb(){
@@ -1815,25 +2212,46 @@ function openVideoForm(editId){
           showToast('縮圖已更新', 'success');
         } catch(e){ showToast('圖片上傳失敗：' + e.message, 'error'); }
       });
+
+      const productListBox = $('#v-product-list', box);
+      const linkedIds = editing ? (editing.productIds || []) : [];
+      if(products.length === 0){
+        productListBox.innerHTML = `<div class="photo-thumb-empty">尚未建立任何產品配方</div>`;
+      } else {
+        productListBox.innerHTML = products.map(p => `
+          <label class="video-product-check">
+            <input type="checkbox" value="${p.id}" ${linkedIds.includes(p.id)?'checked':''}>
+            <span>${esc(p.name)}</span>
+          </label>`).join('');
+      }
     },
     onConfirm:(box)=>{
       const title = $('#v-title', box).value.trim();
-      const url = $('#v-url', box).value.trim();
       if(!title){ showToast('請輸入影片標題', 'error'); return false; }
-      if(!url){ showToast('請輸入影片連結', 'error'); return false; }
-      try{ new URL(url); } catch(e){ showToast('影片連結格式不正確，請確認網址是否完整（需含 https://）', 'error'); return false; }
+
+      const segmentRows = $$('.segment-row', box);
+      const segments = [];
+      for(const row of segmentRows){
+        const label = row.querySelector('.seg-label').value.trim();
+        const url = row.querySelector('.seg-url').value.trim();
+        if(!url) continue;
+        try{ new URL(url); } catch(e){ showToast(`段落「${label||'（未命名）'}」的連結格式不正確，請確認網址是否完整（需含 https://）`, 'error'); return false; }
+        segments.push({ id: uid(), label, url });
+      }
+      if(segments.length === 0){ showToast('請至少輸入一個影片段落的連結', 'error'); return false; }
 
       const category = $('#v-category', box).value.trim();
       const tags = $('#v-tags', box).value.split(',').map(t=>t.trim()).filter(Boolean);
       const notes = $('#v-notes', box).value.trim();
+      const productIds = $$('#v-product-list input:checked', box).map(el => el.value);
 
       if(editing){
-        Object.assign(editing, { title, url, category, tags, notes, thumbnail:thumbData, updatedAt:Date.now() });
-        addLog({ type:'video', title:`編輯教學影片「${title}」`, note:'', details:[] });
+        Object.assign(editing, { title, segments, category, tags, notes, thumbnail:thumbData, productIds, updatedAt:Date.now() });
+        addLog({ type:'video', title:`編輯教學影片「${title}」`, note:`共 ${segments.length} 個段落`, details:[] });
         showToast('已儲存影片變更', 'success');
       } else {
-        videos.push({ id:uid(), title, url, category, tags, notes, thumbnail:thumbData, createdAt:Date.now(), updatedAt:Date.now() });
-        addLog({ type:'video', title:`新增教學影片「${title}」`, note:'', details:[] });
+        videos.push({ id:uid(), title, segments, category, tags, notes, thumbnail:thumbData, productIds, createdAt:Date.now(), updatedAt:Date.now() });
+        addLog({ type:'video', title:`新增教學影片「${title}」`, note:`共 ${segments.length} 個段落`, details:[] });
         showToast('已新增教學影片', 'success');
       }
       persist(); renderVideos(); renderVideoCategoryFilter(); renderHistory();
@@ -1846,7 +2264,7 @@ function confirmDeleteVideo(videoId){
   if(!v) return;
   openModal({
     title:'刪除教學影片',
-    bodyHTML:`<p class="modal-msg">確定要刪除「<strong>${esc(v.title)}</strong>」嗎？筆記內容也會一併刪除，此動作無法復原。</p>`,
+    bodyHTML:`<p class="modal-msg">確定要刪除「<strong>${esc(v.title)}</strong>」嗎？筆記內容與所有段落連結也會一併刪除，此動作無法復原。</p>`,
     confirmText:'刪除', danger:true,
     onConfirm:()=>{
       videos = videos.filter(x => x.id !== videoId);
@@ -1858,17 +2276,38 @@ function confirmDeleteVideo(videoId){
 }
 
 function videoCardHTML(v){
-  const ytId = extractYouTubeId(v.url);
-  const thumb = v.thumbnail || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '');
-  const photoHTML = ytId
-    ? `<div class="video-thumb" data-ytid="${esc(ytId)}" style="${thumb?`background-image:url('${thumb}')`:''}">
+  const segments = v.segments || [];
+  const first = segments[0] || null;
+  const firstYtId = first ? extractYouTubeId(first.url) : '';
+  const coverThumb = v.thumbnail || (firstYtId ? `https://img.youtube.com/vi/${firstYtId}/hqdefault.jpg` : '');
+
+  function segButtonAttrs(seg){
+    const ytId = extractYouTubeId(seg.url);
+    return ytId ? `data-ytid="${esc(ytId)}"` : `data-url="${esc(seg.url)}"`;
+  }
+
+  const photoHTML = firstYtId
+    ? `<div class="video-thumb" ${segButtonAttrs(first)} style="${coverThumb?`background-image:url('${coverThumb}')`:''}">
          <button type="button" class="video-play-btn" aria-label="播放影片">▶</button>
        </div>`
-    : (thumb
-      ? `<a class="video-thumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="background-image:url('${thumb}')"><button type="button" class="video-play-btn" aria-label="前往觀看">▶</button></a>`
-      : `<a class="video-thumb video-thumb-empty" href="${esc(v.url)}" target="_blank" rel="noopener">🎬<span class="video-thumb-hint">前往觀看</span></a>`);
+    : (first
+      ? `<a class="video-thumb" href="${esc(first.url)}" target="_blank" rel="noopener" style="${coverThumb?`background-image:url('${coverThumb}')`:''}"><button type="button" class="video-play-btn" aria-label="前往觀看">▶</button></a>`
+      : `<div class="video-thumb video-thumb-empty">🎬<span class="video-thumb-hint">尚未設定連結</span></div>`);
+
+  const segmentsListHTML = segments.length > 1 ? `<div class="video-segments-list">
+      ${segments.map((seg,i) => {
+        const ytId = extractYouTubeId(seg.url);
+        const label = seg.label || `第 ${i+1} 段`;
+        return ytId
+          ? `<button type="button" class="video-segment-item" ${segButtonAttrs(seg)}>▶ ${esc(label)}</button>`
+          : `<a class="video-segment-item" href="${esc(seg.url)}" target="_blank" rel="noopener">🔗 ${esc(label)}</a>`;
+      }).join('')}
+    </div>` : '';
 
   const tagsHTML = (v.tags && v.tags.length) ? `<div class="video-tags">${v.tags.map(t=>`<span class="batch-tag">#${esc(t)}</span>`).join('')}</div>` : '';
+  const linkedProducts = (v.productIds||[]).map(id => productById(id)).filter(Boolean);
+  const productsHTML = linkedProducts.length
+    ? `<div class="video-tags">${linkedProducts.map(p=>`<span class="badge badge-accent">🧁 ${esc(p.name)}</span>`).join('')}</div>` : '';
   const notesHTML = v.notes ? `<div class="video-notes">${esc(v.notes)}</div>` : `<div class="video-notes video-notes-empty">尚未填寫教學重點筆記</div>`;
 
   return `<div class="catalog-card video-card" data-id="${v.id}">
@@ -1878,10 +2317,13 @@ function videoCardHTML(v){
         <h3 class="catalog-name" style="font-size:16px;">${esc(v.title)}</h3>
         ${v.category ? `<span class="badge badge-accent" style="flex-shrink:0;">${esc(v.category)}</span>` : ''}
       </div>
+      ${segments.length > 1 ? `<div class="field-help">共 ${segments.length} 個影片段落，可分別點選播放：</div>` : ''}
+      ${segmentsListHTML}
+      ${productsHTML}
       ${tagsHTML}
       ${notesHTML}
       <div class="row-actions" style="margin-top:6px;">
-        <a class="btn btn-outline btn-sm" href="${esc(v.url)}" target="_blank" rel="noopener">🔗 開啟原始連結</a>
+        ${first ? `<a class="btn btn-outline btn-sm" href="${esc(first.url)}" target="_blank" rel="noopener">🔗 開啟原始連結</a>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="edit">編輯</button>
         <button class="btn btn-ghost btn-sm" data-act="delete" style="color:var(--danger);">刪除</button>
       </div>
@@ -1898,7 +2340,8 @@ function renderVideos(){
   let filtered = videos.filter(v => {
     if(catFilter !== 'all' && v.category !== catFilter) return false;
     if(textFilter){
-      const hay = (v.title + ' ' + (v.tags||[]).join(' ') + ' ' + (v.category||'')).toLowerCase();
+      const linkedNames = (v.productIds||[]).map(id => { const p=productById(id); return p?p.name:''; }).join(' ');
+      const hay = (v.title + ' ' + (v.tags||[]).join(' ') + ' ' + (v.category||'') + ' ' + linkedNames).toLowerCase();
       if(!hay.includes(textFilter)) return false;
     }
     return true;
@@ -1915,12 +2358,20 @@ function renderVideos(){
   }
 
   box.innerHTML = filtered.map(videoCardHTML).join('');
+
+  // 點擊封面或段落清單中的 YouTube 項目時，在卡片的播放區域切換內嵌播放器
+  function playInCard(card, ytid){
+    const coverArea = card.querySelector('.video-thumb');
+    if(!coverArea) return;
+    coverArea.outerHTML = `<div class="video-thumb video-embed-active"><iframe src="https://www.youtube-nocookie.com/embed/${esc(ytid)}?autoplay=1" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
   $$('#videos-list .video-thumb[data-ytid]').forEach(el => {
-    el.addEventListener('click', () => {
-      const ytid = el.dataset.ytid;
-      el.outerHTML = `<div class="video-thumb video-embed-active"><iframe src="https://www.youtube-nocookie.com/embed/${esc(ytid)}?autoplay=1" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-    });
+    el.addEventListener('click', () => playInCard(el.closest('.catalog-card'), el.dataset.ytid));
   });
+  $$('#videos-list .video-segment-item[data-ytid]').forEach(el => {
+    el.addEventListener('click', () => playInCard(el.closest('.catalog-card'), el.dataset.ytid));
+  });
+
   $$('#videos-list .catalog-card').forEach(card => {
     const id = card.dataset.id;
     card.querySelector('[data-act=edit]')?.addEventListener('click', () => openVideoForm(id));
@@ -1945,21 +2396,36 @@ function renderProductionSelect(){
     if(prev && productById(prev)) sel.value = prev;
   }
 }
+function renderRecipeSelect(product){
+  const sel = $('#pr-recipe-select');
+  const recipes = product ? (product.recipes || []) : [];
+  if(recipes.length === 0){
+    sel.innerHTML = `<option value="">（此產品尚無配方版本）</option>`;
+    return;
+  }
+  sel.innerHTML = recipes.map(r => `<option value="${r.id}">${esc(r.name)}（${recipeTypeLabel(r.type)}）</option>`).join('');
+  // 預設選擇「主配方」（若有），否則選第一個
+  const base = recipes.find(r => r.type === 'base');
+  sel.value = (base || recipes[0]).id;
+}
 
-function computeProductionPlan(product, qty){
-  return product.ingredients.map(ing => {
+function computeProductionPlan(recipe, qty){
+  return recipe.ingredients.map(ing => {
     const mat = materialById(ing.materialId);
     const need = ing.qty * qty;
     const stock = mat ? mat.stock : 0;
-    const remain = stock - need;
-    const willBreakPackage = !!(mat && mat.trackByPackage && (mat.openStock||0) < need && (mat.batches||[]).some(b=>b.count>0));
-    return { ing, mat, need, stock, remain, sufficient: mat ? remain >= 0 : false, willBreakPackage };
+    const owed = mat ? (mat.pendingShortage||0) : 0;
+    const available = round2(stock - owed);
+    const remain = round2(available - need);
+    const willBreakPackage = !!(mat && mat.trackByPackage && openBatchesTotal(mat) < need && (mat.batches||[]).some(b=>b.count>0));
+    return { ing, mat, need, stock, available, remain, sufficient: mat ? remain >= 0 : false, willBreakPackage };
   });
 }
 
 function renderProduction(){
   renderProductionSelect();
   const sel = $('#pr-select');
+  const recipeSel = $('#pr-recipe-select');
   const qtyInput = $('#pr-qty');
   const bannerBox = $('#pr-banner');
   const tableBox = $('#pr-table');
@@ -1969,29 +2435,37 @@ function renderProduction(){
   if(products.length === 0){
     bannerBox.innerHTML = `<div class="prod-banner idle">尚未建立任何產品配方，請先至「產品配方」頁面建立。</div>`;
     tableBox.innerHTML = '';
+    recipeSel.innerHTML = '';
     confirmBtn.disabled = true;
     return;
   }
 
+  function currentRecipe(){
+    const product = productById(sel.value);
+    if(!product) return null;
+    return (product.recipes||[]).find(r => r.id === recipeSel.value) || (product.recipes||[])[0] || null;
+  }
+
   function paint(){
     const product = productById(sel.value);
+    const recipe = currentRecipe();
     const qty = Math.max(1, parseInt(qtyInput.value) || 1);
-    if(!product){ tableBox.innerHTML=''; bannerBox.innerHTML=''; confirmBtn.disabled = true; return; }
-    const plan = computeProductionPlan(product, qty);
+    if(!product || !recipe){ tableBox.innerHTML=''; bannerBox.innerHTML=''; confirmBtn.disabled = true; return; }
+    const plan = computeProductionPlan(recipe, qty);
     const allOk = plan.every(r => r.sufficient);
     const shortfalls = plan.filter(r => !r.sufficient);
 
     bannerBox.innerHTML = allOk
-      ? `<div class="prod-banner ok">✓ 庫存充足，可直接製作 ${qty} 個「${esc(product.name)}」！</div>`
+      ? `<div class="prod-banner ok">✓ 庫存充足，可直接以「${esc(recipe.name)}」製作 ${qty} 個「${esc(product.name)}」！</div>`
       : `<div class="prod-banner bad">✕ 庫存不足，尚缺：${shortfalls.map(r=> `${esc(r.mat? r.mat.name : '（已刪除材料）')} ${fmtNum(Math.abs(r.remain))}${r.mat?esc(r.mat.unit):''}`).join('、')}</div>`;
 
     tableBox.innerHTML = `<table class="responsive-table">
-      <thead><tr><th>原物料</th><th>單位用量</th><th>本次需求</th><th>目前庫存</th><th>結算後剩餘</th><th>狀態</th></tr></thead>
+      <thead><tr><th>原物料</th><th>單位用量</th><th>本次需求</th><th>可用庫存</th><th>結算後剩餘</th><th>狀態</th></tr></thead>
       <tbody>${plan.map(r => `<tr>
         <td data-label="原物料">${r.mat ? esc(r.mat.name) : '<span style="color:var(--danger)">⚠ 已刪除材料</span>'}</td>
         <td class="num-cell" data-label="單位用量">${fmtNum(r.ing.qty)} ${r.mat?esc(r.mat.unit):''}</td>
         <td class="num-cell" data-label="本次需求">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td>
-        <td class="num-cell" data-label="目前庫存">${fmtNum(r.stock)}</td>
+        <td class="num-cell" data-label="可用庫存">${fmtNum(r.available)}${r.mat&&r.mat.pendingShortage>0?` <span class="ref-tag" style="color:var(--danger);background:var(--danger-soft);">已扣缺貨${fmtNum(r.mat.pendingShortage)}</span>`:''}</td>
         <td class="num-cell" data-label="結算後剩餘" style="color:${r.remain<0?'var(--danger)':'var(--ink)'}">${fmtNum(r.remain)}</td>
         <td data-label="狀態">${r.sufficient ? badgeHTML({level:'ok',label:'足夠'}) : badgeHTML({level:'danger',label:'不足'})}${r.willBreakPackage?` <span class="batch-tag">📦 需拆包</span>`:''}</td>
       </tr>`).join('')}</tbody>
@@ -2000,89 +2474,132 @@ function renderProduction(){
     confirmBtn.disabled = !(allOk || override.checked);
   }
 
-  sel.onchange = paint;
+  sel.onchange = () => { renderRecipeSelect(productById(sel.value)); paint(); };
+  renderRecipeSelect(productById(sel.value));
+  recipeSel.onchange = paint;
   qtyInput.oninput = paint;
   override.onchange = paint;
   paint();
 
   confirmBtn.onclick = () => {
     const product = productById(sel.value);
+    const recipe = currentRecipe();
     const qty = Math.max(1, parseInt(qtyInput.value) || 1);
-    const plan = computeProductionPlan(product, qty);
+    const plan = computeProductionPlan(recipe, qty);
     const allOk = plan.every(r => r.sufficient);
     if(!allOk && !override.checked){ showToast('庫存不足，請補貨或勾選允許不足結算', 'error'); return; }
 
     const needChoice = plan.filter(r => r.willBreakPackage);
     if(needChoice.length > 0){
       openBatchChoiceQueue(needChoice, 0, {}, override.checked, (selections) => {
-        openProduceConfirmModal(product, qty, plan, allOk, selections);
+        openProduceConfirmModal(product, recipe, qty, plan, allOk, selections);
       });
     } else {
-      openProduceConfirmModal(product, qty, plan, allOk, {});
+      openProduceConfirmModal(product, recipe, qty, plan, allOk, {});
     }
   };
 }
 
-// 依序詢問使用者：拆封中庫存不夠時，要拆哪一批整包（哪個規格／哪個廠牌）
+// 依序詢問使用者：拆封中庫存不夠時，要拆哪些整包（可複選多個規格／品牌，湊足所需數量）
 function openBatchChoiceQueue(list, idx, selections, allowNegative, onDone){
   if(idx >= list.length){ onDone(selections); return; }
   const item = list[idx];
   const mat = item.mat;
-  const deficit = round2(item.need - (mat.openStock||0));
+  const currentOpen = openBatchesTotal(mat);
+  const deficit = round2(item.need - currentOpen);
   const batches = (mat.batches||[]).filter(b => b.count > 0);
-  const optionsHTML = batches.map((b,i) => `
+  const rowsHTML = batches.map((b) => `
     <label class="batch-choice">
-      <input type="radio" name="batch-choice" value="${b.id}" ${i===0?'checked':''}>
-      <span><strong>${fmtNum(b.size)}${esc(mat.unit)}</strong>／包　現有 ${fmtNum(b.count)} ${esc(mat.packageUnit||'包')}${b.note?` <span class="batch-tag">${esc(b.note)}</span>`:''}</span>
+      <input type="checkbox" class="bc-check" value="${b.id}">
+      <span style="flex:1;"><strong>${fmtNum(b.size)}${esc(mat.unit)}</strong>／包　現有 ${fmtNum(b.count)} ${esc(mat.packageUnit||'包')}${b.note?` <span class="batch-tag">${esc(b.note)}</span>`:''}</span>
+      <input type="number" class="bc-count" min="0" max="${b.count}" step="1" placeholder="開幾包" style="width:90px;" disabled>
     </label>`).join('');
 
   openModal({
     title:`📦 需要拆開新的整包：${mat.name}`,
     bodyHTML:`
-      <p class="modal-msg">「${esc(mat.name)}」拆封中庫存僅剩 <strong class="mono">${fmtNum(mat.openStock||0)}${esc(mat.unit)}</strong>，
+      <p class="modal-msg">「${esc(mat.name)}」拆封中庫存僅剩 <strong class="mono">${fmtNum(currentOpen)}${esc(mat.unit)}</strong>，
         本次生產需要 <strong class="mono">${fmtNum(item.need)}${esc(mat.unit)}</strong>，
         還缺 <strong class="mono" style="color:var(--danger);">${fmtNum(deficit)}${esc(mat.unit)}</strong>。
-        請選擇要從哪一種包裝拆封：</p>
-      <div class="batch-choice-list">${optionsHTML}</div>
+        可複選多種規格／品牌來湊足數量：</p>
+      <div class="batch-choice-list">${rowsHTML}</div>
+      <div class="field-help" id="bc-total-hint" style="margin-top:10px;font-weight:700;"></div>
     `,
     confirmText:'確認拆包',
     wide:true,
+    onMount:(box)=>{
+      const checks = $$('.bc-check', box);
+      function updateHint(){
+        let total = 0;
+        checks.forEach(chk => {
+          const countInput = chk.closest('.batch-choice').querySelector('.bc-count');
+          countInput.disabled = !chk.checked;
+          if(chk.checked){ total += (parseInt(countInput.value)||0) * parseFloat(batches.find(b=>b.id===chk.value).size); }
+        });
+        const hint = $('#bc-total-hint', box);
+        const enough = total >= deficit;
+        hint.style.color = enough ? 'var(--sage)' : 'var(--danger)';
+        hint.textContent = `目前已選擇拆封共 ${fmtNum(total)}${mat.unit}（尚缺 ${fmtNum(deficit)}${mat.unit}）${enough?' ✓ 已足夠':''}`;
+      }
+      checks.forEach(chk => {
+        chk.addEventListener('change', () => {
+          const countInput = chk.closest('.batch-choice').querySelector('.bc-count');
+          if(chk.checked && !countInput.value){
+            const b = batches.find(x=>x.id===chk.value);
+            countInput.value = Math.min(b.count, Math.max(1, Math.ceil(round2(deficit/b.size) - 1e-9)));
+          }
+          updateHint();
+        });
+        chk.closest('.batch-choice').querySelector('.bc-count').addEventListener('input', updateHint);
+      });
+      updateHint();
+    },
     onConfirm:(box)=>{
-      const picked = box.querySelector('input[name="batch-choice"]:checked');
-      if(!picked){ showToast('請選擇要拆封的包裝', 'error'); return false; }
-      const batchId = picked.value;
-      const batch = batches.find(b => b.id === batchId);
-      const neededPackages = Math.ceil(round2(deficit / batch.size) - 1e-9);
-      if(neededPackages > batch.count && !allowNegative){
-        showToast(`這個包裝剩 ${batch.count} 包，不足以拆出 ${neededPackages} 包，請選擇其他包裝、先進貨，或勾選「允許庫存不足仍要結算」`, 'error');
+      const choices = [];
+      let total = 0;
+      $$('.bc-check', box).forEach(chk => {
+        if(!chk.checked) return;
+        const countInput = chk.closest('.batch-choice').querySelector('.bc-count');
+        const count = parseInt(countInput.value) || 0;
+        const batch = batches.find(b => b.id === chk.value);
+        if(count > 0 && batch){
+          choices.push({ batchId: batch.id, count: Math.min(count, batch.count) });
+          total += Math.min(count, batch.count) * batch.size;
+        }
+      });
+      if(choices.length === 0){ showToast('請至少勾選一種規格並輸入包數', 'error'); return false; }
+      if(round2(total) < deficit && !allowNegative){
+        showToast(`已選擇的包數合計只有 ${fmtNum(total)}${mat.unit}，還不夠補足缺口 ${fmtNum(deficit)}${mat.unit}，請增加包數或勾選「允許庫存不足仍要結算」`, 'error');
         return false;
       }
-      selections[mat.id] = batchId;
+      selections[mat.id] = choices;
       setTimeout(() => openBatchChoiceQueue(list, idx + 1, selections, allowNegative, onDone), 0);
     }
   });
 }
 
-function openProduceConfirmModal(product, qty, plan, allOk, batchSelections){
+function openProduceConfirmModal(product, recipe, qty, plan, allOk, batchSelections){
   openModal({
     title:'確認生產結算',
-    bodyHTML:`<p class="modal-msg">即將製作 <strong>${qty}</strong> 個「<strong>${esc(product.name)}</strong>」，
+    bodyHTML:`<p class="modal-msg">即將以「<strong>${esc(recipe.name)}</strong>」（${recipeTypeLabel(recipe.type)}）製作 <strong>${qty}</strong> 個「<strong>${esc(product.name)}</strong>」，
       以下原物料將自動從庫存扣除：</p>
       <table class="responsive-table" style="margin-top:10px;"><thead><tr><th>原物料</th><th>扣除量</th><th>拆封來源</th></tr></thead>
       <tbody>${plan.map(r=>{
         let sourceLabel = '—';
         if(r.mat && r.mat.trackByPackage){
-          const chosenId = batchSelections[r.mat.id];
-          if(chosenId){
-            const b = (r.mat.batches||[]).find(x=>x.id===chosenId);
-            sourceLabel = b ? `拆 ${fmtNum(b.size)}${esc(r.mat.unit)}／包${b.note?`（${esc(b.note)}）`:''}` : '—';
+          const chosen = batchSelections[r.mat.id];
+          if(chosen && chosen.length){
+            sourceLabel = chosen.map(c => {
+              const b = (r.mat.batches||[]).find(x=>x.id===c.batchId);
+              return b ? `${c.count}${r.mat.packageUnit||'包'}×${fmtNum(b.size)}${esc(r.mat.unit)}${b.note?`(${esc(b.note)})`:''}` : '';
+            }).filter(Boolean).join('、');
           } else {
             sourceLabel = '沿用拆封中庫存';
           }
         }
         return `<tr><td data-label="原物料">${r.mat?esc(r.mat.name):'（已刪除）'}</td><td class="num-cell" data-label="扣除量">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td><td data-label="拆封來源">${sourceLabel}</td></tr>`;
       }).join('')}</tbody></table>
-      ${!allOk ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 部分材料庫存不足，結算後將出現負數庫存，請盡快補貨。</p>` : ''}`,
+      ${!allOk ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 部分材料庫存不足，超出的部分會記錄為「缺貨待補」，不會出現負數，下次進貨時系統會自動優先扣抵。</p>` : ''}`,
     confirmText:'確認結算',
     wide:true,
     onConfirm:()=>{
@@ -2090,18 +2607,19 @@ function openProduceConfirmModal(product, qty, plan, allOk, batchSelections){
       plan.forEach(r => {
         if(!r.mat) return;
         if(r.mat.trackByPackage){
-          const chosenId = batchSelections[r.mat.id];
-          if(chosenId){ consumeFromChosenBatch(r.mat, r.need, chosenId); }
+          const chosen = batchSelections[r.mat.id];
+          if(chosen && chosen.length){ consumeFromChosenBatches(r.mat, r.need, chosen); }
           else { consumeFromBatches(r.mat, r.need); }
         } else {
           r.mat.stock = round2(r.mat.stock - r.need);
         }
         r.mat.updatedAt = Date.now();
-        details.push({ materialName:r.mat.name, used:r.need, unit:r.mat.unit, stockAfter:r.mat.stock });
+        details.push({ materialId:r.mat.id, materialName:r.mat.name, used:r.need, unit:r.mat.unit, stockAfter:r.mat.stock });
       });
       addLog({
-        type:'produce', title:`生產結算「${product.name}」× ${qty}`,
-        note: allOk ? '庫存充足，正常結算' : '庫存不足，強制結算（可能為負數庫存）',
+        type:'produce', title:`生產結算「${product.name}」× ${qty}（${recipe.name}）`,
+        note: allOk ? '庫存充足，正常結算' : '庫存不足，超出部分記為缺貨待補（不會出現負數庫存）',
+        productId: product.id, recipeId: recipe.id, qty,
         details
       });
       persist(); renderAll();
@@ -2147,7 +2665,7 @@ function renderHistory(){
   }
 
   box.innerHTML = `<table class="responsive-table">
-    <thead><tr><th style="width:150px;">時間</th><th style="width:110px;">類型</th><th>內容</th><th style="width:110px;">數量變化</th></tr></thead>
+    <thead><tr><th style="width:150px;">時間</th><th style="width:110px;">類型</th><th>內容</th><th style="width:110px;">數量變化</th><th style="width:110px;">操作</th></tr></thead>
     <tbody>${filtered.map(l => {
       const meta = logTypeMeta(l.type);
       let qtyCell = '—';
@@ -2158,14 +2676,60 @@ function renderHistory(){
       const detailHTML = (l.details && l.details.length)
         ? `<div class="log-detail">${l.details.map(d=>`<span>${esc(d.materialName)} -${fmtNum(d.used)}${esc(d.unit||'')}</span>`).join('')}</div>`
         : '';
+      const isVoided = !!l.reversed;
+      const canVoid = l.type === 'produce' && !isVoided;
+      const actionCell = canVoid
+        ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger);" data-act="void" data-id="${l.id}">作廢還原庫存</button>`
+        : (isVoided ? `<span class="badge badge-neutral">已作廢</span>` : '—');
       return `<tr>
         <td class="num-cell" data-label="時間">${fmtDate(l.timestamp)}</td>
         <td data-label="類型"><span class="badge ${meta.cls}">${meta.label}</span></td>
-        <td class="cell-block" data-label="內容">${esc(l.title)}${l.note?`<div class="log-detail">${esc(l.note)}</div>`:''}${detailHTML}</td>
+        <td class="cell-block" data-label="內容" style="${isVoided?'opacity:.55;text-decoration:line-through;':''}">${esc(l.title)}${l.note?`<div class="log-detail" style="text-decoration:none;">${esc(l.note)}</div>`:''}${detailHTML}</td>
         <td data-label="數量變化">${qtyCell}</td>
+        <td class="cell-actions" data-label="操作">${actionCell}</td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
+
+  $$('#history-list [data-act=void]').forEach(btn => {
+    btn.addEventListener('click', () => confirmVoidProductionLog(btn.dataset.id));
+  });
+}
+
+// 作廢一筆「生產結算」紀錄：把當初扣除的原物料加回庫存（整包管理的原物料會加回「拆封中」，
+// 並標記備註為退回，方便日後追蹤），原始紀錄保留但標示為已作廢，不會真的從歷史中消失。
+function confirmVoidProductionLog(logId){
+  const log = logs.find(l => l.id === logId);
+  if(!log || log.type !== 'produce' || log.reversed) return;
+  const details = log.details || [];
+  openModal({
+    title:'作廢生產結算紀錄',
+    bodyHTML:`<p class="modal-msg">確定要作廢「<strong>${esc(log.title)}</strong>」嗎？系統會把當初扣除的原物料加回庫存：</p>
+      <table class="responsive-table" style="margin-top:10px;"><thead><tr><th>原物料</th><th>將加回數量</th></tr></thead>
+      <tbody>${details.map(d=>`<tr><td data-label="原物料">${esc(d.materialName)}</td><td class="num-cell" data-label="將加回數量">+${fmtNum(d.used)} ${esc(d.unit||'')}</td></tr>`).join('') || '<tr><td colspan="2">（此紀錄無詳細材料資料，僅會標示作廢）</td></tr>'}</tbody></table>
+      <p class="modal-msg field-help" style="margin-top:10px;">此動作無法復原；原紀錄會保留在歷史中並標示「已作廢」，不會被刪除，以維持完整稽核軌跡。</p>`,
+    confirmText:'確認作廢並還原庫存',
+    danger:true,
+    onConfirm:()=>{
+      details.forEach(d => {
+        const mat = d.materialId ? materialById(d.materialId) : materials.find(m=>m.name===d.materialName);
+        if(!mat) return;
+        if(mat.trackByPackage){
+          if(!mat.openBatches) mat.openBatches = [];
+          const key = specKey(d.used, '取消生產退回');
+          mat.openBatches.push({ id:uid(), size:d.used, note:'取消生產退回', remaining:d.used });
+          recalcMaterialStock(mat);
+        } else {
+          mat.stock = round2(mat.stock + d.used);
+        }
+        mat.updatedAt = Date.now();
+      });
+      log.reversed = true;
+      addLog({ type:'produce', title:`作廢生產結算「${log.title}」`, note:'已將原物料加回庫存（整包管理的原物料會列在「拆封中」，標註為取消生產退回）', details:[] });
+      persist(); renderAll();
+      showToast('已作廢並還原庫存', 'success');
+    }
+  });
 }
 
 $('#f-filter-type').addEventListener('change', renderHistory);
@@ -2176,8 +2740,8 @@ $('#f-filter-text').addEventListener('input', renderHistory);
 ========================================================= */
 function renderDashboard(){
   const total = materials.length;
-  const low = materials.filter(m => m.stock > 0 && m.safetyStock > 0 && m.stock < m.safetyStock).length;
-  const out = materials.filter(m => m.stock <= 0).length;
+  const low = materials.filter(m => m.stock > 0 && (m.pendingShortage||0)<=0 && m.safetyStock > 0 && m.stock < m.safetyStock).length;
+  const out = materials.filter(m => m.stock <= 0 || (m.pendingShortage||0) > 0).length;
   const prodCount = products.length;
 
   $('#dash-stats').innerHTML = `
@@ -2187,7 +2751,7 @@ function renderDashboard(){
     <div class="stat-card ok"><div class="num">${prodCount}</div><div class="lbl">產品配方數</div></div>
   `;
 
-  const alerts = materials.filter(m => m.stock <= 0 || (m.safetyStock > 0 && m.stock < m.safetyStock))
+  const alerts = materials.filter(m => m.stock <= 0 || (m.pendingShortage||0) > 0 || (m.safetyStock > 0 && m.stock < m.safetyStock))
     .sort((a,b)=> (a.stock/(a.safetyStock||1)) - (b.stock/(b.safetyStock||1)));
   const lowBox = $('#dash-lowstock');
   if(alerts.length === 0){
@@ -2234,8 +2798,12 @@ function downloadCSV(filename, rows){
 }
 
 $('#btn-export-materials').addEventListener('click', () => {
-  const rows = [['名稱','單位','目前庫存','安全庫存','備註']];
-  materials.forEach(m => rows.push([m.name, m.unit, m.stock, m.safetyStock, m.note||'']));
+  const rows = [['名稱','分類','單位','目前庫存','安全庫存','缺貨待補','整包明細','拆封中明細','備註']];
+  materials.forEach(m => {
+    const batchDesc = (m.batches||[]).map(b=>`${fmtNum(b.size)}${m.unit}×${b.count}${m.packageUnit||'包'}${b.note?`(${b.note})`:''}`).join('；');
+    const openDesc = (m.openBatches||[]).map(o=>`${fmtNum(o.remaining)}${m.unit}${o.note?`(${o.note})`:''}`).join('；');
+    rows.push([m.name, m.category||'', m.unit, m.stock, m.safetyStock, m.pendingShortage||0, batchDesc, openDesc, m.note||'']);
+  });
   downloadCSV('原物料庫存.csv', rows);
   showToast('已匯出原物料庫存 CSV', 'success');
 });
@@ -2250,6 +2818,8 @@ $('#btn-export-logs').addEventListener('click', () => {
    綁定新增按鈕
 ========================================================= */
 $('#btn-add-material').addEventListener('click', () => openMaterialForm(null));
+$('#m-filter-category').addEventListener('change', renderMaterials);
+$('#m-filter-text').addEventListener('input', renderMaterials);
 $('#btn-add-product').addEventListener('click', () => openProductForm(null));
 
 /* =========================================================
