@@ -496,6 +496,15 @@
 
   select#f-filter-type, select#pr-select{cursor:pointer;}
   .footer-note{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:40px;}
+
+  .backup-banner{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    background:var(--honey-soft);border:1px solid #E8CE8A;border-radius:var(--radius);
+    padding:16px 20px;margin:20px 0 30px;
+  }
+  .backup-banner-text{flex:1 1 320px;font-size:13.5px;color:#6B4E1A;}
+  .backup-banner-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+  @media(max-width:640px){ .backup-banner{padding:14px;} }
   ::placeholder{color:#A79C8B;}
 </style>
 </head>
@@ -523,6 +532,19 @@
   <!-- ================= DASHBOARD ================= -->
   <section class="panel active" id="panel-dashboard">
     <div class="grid grid-4" id="dash-stats"></div>
+
+    <div class="backup-banner">
+      <div class="backup-banner-text">
+        <strong>⚠ 資料只存在這個瀏覽器裡</strong>
+        <div class="field-help" style="margin-top:4px;">本工具沒有伺服器資料庫，所有資料都存在您目前這個瀏覽器的本機空間（localStorage）。<strong>更新網站程式碼本身不會清空資料</strong>，但換瀏覽器、換裝置、清除瀏覽器資料、或改用不同網址開啟，都會讀不到原本的資料。強烈建議每次更新網站前，先按「匯出完整備份」存一份，之後有需要再「匯入備份」還原。</div>
+      </div>
+      <div class="backup-banner-actions">
+        <button class="btn btn-primary btn-sm" id="btn-export-backup">⬇ 匯出完整備份</button>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          ⬆ 匯入備份還原<input type="file" id="btn-import-backup" accept="application/json,.json" style="display:none;">
+        </label>
+      </div>
+    </div>
 
     <div class="section-head">
       <div><h2>庫存警示</h2><div class="hint">法力不足的原料清單：庫存量低於安全存量或已缺貨</div></div>
@@ -658,7 +680,7 @@
     <div class="card"><div id="history-list"></div></div>
   </section>
 
-  <div class="footer-note">🪄 巧遇。甜心屋・魔法烘焙手帳｜資料儲存在本機瀏覽器（localStorage），僅此裝置可見；建議定期使用「匯出 CSV」備份法寶。</div>
+  <div class="footer-note">🪄 巧遇。甜心屋・魔法烘焙手帳｜資料儲存在本機瀏覽器（localStorage），僅此裝置可見；請至「儀表板」使用「匯出完整備份」定期保存所有資料。</div>
 </div>
 
 <div id="modal-root"></div>
@@ -675,11 +697,15 @@ function loadLS(key, fallback){
   catch(e){ return fallback; }
 }
 function saveLS(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function loadArrayLS(key){
+  const v = loadLS(key, []);
+  return Array.isArray(v) ? v : []; // 防止異常/損毀資料被誤判成「已清空」，寧可保留空陣列也不讓整頁壞掉
+}
 
-let materials = loadLS(LS_KEYS.materials, []);
-let products  = loadLS(LS_KEYS.products, []);
-let logs      = loadLS(LS_KEYS.logs, []);
-let videos    = loadLS(LS_KEYS.videos, []);
+let materials = loadArrayLS(LS_KEYS.materials);
+let products  = loadArrayLS(LS_KEYS.products);
+let logs      = loadArrayLS(LS_KEYS.logs);
+let videos    = loadArrayLS(LS_KEYS.videos);
 
 function persist(){
   saveLS(LS_KEYS.materials, materials);
@@ -804,18 +830,30 @@ seedDemoData();
 function migrateLegacyData(){
   let changed = false;
   materials.forEach(mat => {
+    // 最舊版本：只有單一 packageSize 數字，沒有 batches／openBatches 陣列。
+    // 若偵測到這種舊結構，把目前的總庫存(mat.stock)保留下來，轉成一筆「未分品牌」的拆封中庫存，
+    // 避免因為新版程式讀不到舊欄位、之後又剛好觸發重新計算，導致庫存被誤判成 0。
+    if(mat.trackByPackage && mat.packageSize !== undefined){
+      if((!mat.batches || mat.batches.length === 0) && (!mat.openBatches || mat.openBatches.length === 0) && mat.stock > 0){
+        mat.openBatches = [{ id:uid(), size:mat.stock, note:'（舊版資料自動轉入，請重新盤點分配品牌）', remaining:mat.stock }];
+      }
+      delete mat.packageSize;
+      changed = true;
+    }
     if(mat.openStock !== undefined && !mat.openBatches){
       mat.openBatches = mat.openStock > 0 ? [{ id:uid(), size:mat.openStock, note:'（舊資料遷移）', remaining:mat.openStock }] : [];
       delete mat.openStock;
       changed = true;
     }
-    if(!mat.openBatches) mat.openBatches = [];
+    if(!mat.batches) { mat.batches = []; changed = true; }
+    if(!mat.openBatches) { mat.openBatches = []; changed = true; }
     if(!mat.knownSpecs){
       mat.knownSpecs = (mat.batches||[]).map(b => ({ size:b.size, note:b.note }));
       changed = true;
     }
     if(mat.pendingShortage === undefined){ mat.pendingShortage = 0; changed = true; }
     if(mat.category === undefined){ mat.category = ''; changed = true; }
+    if(mat.stock === undefined){ mat.stock = 0; changed = true; }
   });
   products.forEach(p => {
     if(!p.recipes){
@@ -834,7 +872,8 @@ function migrateLegacyData(){
   });
   if(changed) persist();
 }
-migrateLegacyData();
+try{ migrateLegacyData(); }
+catch(e){ console.error('資料遷移發生錯誤，已跳過以保留原始資料：', e); }
 
 /* =========================================================
    小工具 Utils
@@ -2784,6 +2823,82 @@ function renderDashboard(){
 /* =========================================================
    CSV 匯出
 ========================================================= */
+/* =========================================================
+   完整資料備份／還原
+   說明：本工具的所有資料都存在瀏覽器本機（localStorage），沒有雲端資料庫。
+   換裝置、換瀏覽器、清除瀏覽器資料、或改用不同網址開啟，都會讀不到原本的資料
+  （單純更新網站程式碼本身並不會清空資料，只要每次都用同一個網址開啟即可）。
+   這裡提供「匯出完整備份」／「匯入備份還原」，讓使用者能自行掌控資料搬移與救援。
+========================================================= */
+const BACKUP_VERSION = 1;
+
+function exportFullBackup(){
+  const payload = {
+    app:'巧遇。甜心屋・魔法烘焙手帳',
+    backupVersion: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    data: { materials, products, logs, videos }
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  a.href = url; a.download = `巧遇甜心屋_資料備份_${stamp}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('已匯出完整備份，請妥善保存這個檔案', 'success');
+}
+
+function importFullBackupFile(file){
+  const reader = new FileReader();
+  reader.onerror = () => showToast('讀取備份檔案失敗', 'error');
+  reader.onload = () => {
+    let parsed;
+    try{ parsed = JSON.parse(reader.result); }
+    catch(e){ showToast('這不是有效的備份檔案（JSON 格式錯誤）', 'error'); return; }
+
+    const data = parsed && parsed.data ? parsed.data : parsed; // 相容「整包物件」或「直接四個陣列」兩種格式
+    if(!data || !Array.isArray(data.materials) || !Array.isArray(data.products)){
+      showToast('這不是有效的備份檔案，找不到原物料／產品資料', 'error'); return;
+    }
+    openModal({
+      title:'匯入備份還原',
+      bodyHTML:`<p class="modal-msg">即將以備份檔案的內容<strong style="color:var(--danger);">完全覆蓋</strong>目前這個瀏覽器裡的所有資料，包含原物料庫存、產品配方、教學影片與異動紀錄。</p>
+        <p class="modal-msg" style="margin-top:8px;">備份時間：${parsed.exportedAt ? esc(fmtDate(new Date(parsed.exportedAt).getTime())) : '（未知）'}<br>
+        內含：${data.materials.length} 項原物料、${data.products.length} 項產品配方、${(data.videos||[]).length} 支教學影片、${(data.logs||[]).length} 筆異動紀錄</p>
+        <p class="modal-msg" style="color:var(--danger);margin-top:8px;">此動作無法復原，建議先匯出目前資料的備份再繼續。</p>`,
+      confirmText:'確認覆蓋還原', danger:true,
+      onConfirm:()=>{
+        const prevSnapshot = { materials, products, logs, videos }; // 還原失敗時可以退回目前狀態，不會讓資料介於一半好一半壞
+        try{
+          materials = data.materials || [];
+          products = data.products || [];
+          logs = data.logs || [];
+          videos = data.videos || [];
+          migrateLegacyData(); // 不論備份是哪個舊版本匯出的，都會走跟一般載入時一樣的自動升級流程
+          saveLS(LS_KEYS.seeded, true);
+          persist();
+          renderAll();
+          showToast('已還原備份資料', 'success');
+        } catch(e){
+          materials = prevSnapshot.materials; products = prevSnapshot.products;
+          logs = prevSnapshot.logs; videos = prevSnapshot.videos;
+          console.error('匯入備份時發生錯誤：', e);
+          showToast('匯入失敗，已保留原本的資料未被覆蓋。這份備份可能來自比目前程式更新的版本，建議改用最新版的頁面來匯入。', 'error');
+        }
+      }
+    });
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+$('#btn-export-backup').addEventListener('click', exportFullBackup);
+$('#btn-import-backup').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) importFullBackupFile(file);
+  e.target.value = '';
+});
+
 function downloadCSV(filename, rows){
   const csv = rows.map(r => r.map(c => {
     const s = String(c ?? '');
@@ -2932,7 +3047,17 @@ function renderAll(){
   renderVideos();
   renderHistory();
 }
-renderAll();
+try{
+  renderAll();
+} catch(e){
+  console.error('渲染畫面時發生錯誤：', e);
+  document.body.innerHTML = `<div style="max-width:560px;margin:60px auto;padding:24px;font-family:sans-serif;line-height:1.7;">
+    <h2 style="color:#C0392B;">⚠ 畫面載入時發生錯誤</h2>
+    <p>您的資料<strong>並未被刪除</strong>，仍安全地保存在這個瀏覽器的本機儲存空間中，只是目前這個版本的頁面渲染時出了問題（可能是程式更新造成的相容性問題）。</p>
+    <p>建議處理方式：<br>1. 重新整理頁面再試一次<br>2. 若仍無法載入，請改用先前備份的 HTML 版本開啟，並使用「匯出完整備份」把資料存出來，再貼上最新版本後「匯入備份還原」</p>
+    <p style="color:#6B6155;font-size:13px;">錯誤訊息（可提供給協助除錯的人）：${(e && e.message) ? e.message.replace(/</g,'&lt;') : '未知錯誤'}</p>
+  </div>`;
+}
 </script>
 </body>
 </html>
