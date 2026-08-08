@@ -506,6 +506,14 @@
   .backup-banner-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
   @media(max-width:640px){ .backup-banner{padding:14px;} }
 
+  .danger-banner{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    background:var(--danger-soft);border:1px solid #E8B3AA;border-radius:var(--radius);
+    padding:16px 20px;margin:0 0 30px;
+  }
+  .danger-banner .backup-banner-text{color:#7A2E24;}
+  @media(max-width:640px){ .danger-banner{padding:14px;} }
+
   .sync-status-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
   .sync-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
   .sync-dot.off{background:var(--ink-soft);}
@@ -560,6 +568,16 @@
         <label class="btn btn-outline btn-sm" style="cursor:pointer;">
           ⬆ 匯入備份還原<input type="file" id="btn-import-backup" accept="application/json,.json" style="display:none;">
         </label>
+      </div>
+    </div>
+
+    <div class="danger-banner">
+      <div class="backup-banner-text">
+        <strong>🧹 測試資料太亂了？</strong>
+        <div class="field-help" style="margin-top:4px;">一鍵清空目前所有原物料、產品配方、教學影片與異動紀錄，重新回到系統內建的範例資料狀態，方便重新測試。<strong>這個動作無法復原</strong>，建議先「匯出完整備份」留一份現在的資料再重置。</div>
+      </div>
+      <div class="backup-banner-actions">
+        <button class="btn btn-outline btn-sm" id="btn-reset-demo" style="color:var(--danger);border-color:var(--danger);">🔄 重置為預設範例資料</button>
       </div>
     </div>
 
@@ -973,6 +991,19 @@ function migrateLegacyData(){
     if(mat.pendingShortage === undefined){ mat.pendingShortage = 0; changed = true; }
     if(mat.category === undefined){ mat.category = ''; changed = true; }
     if(mat.stock === undefined){ mat.stock = 0; changed = true; }
+    // 清理先前版本的臭蟲：每作廢一次生產結算，就會多堆出一筆「取消生產退回」的拆封中項目，
+    // 而不是合併回同一筆。這裡把同一個原物料底下的拆封中項目合併：
+    // 「取消生產退回」這種通用備註不分大小、全部合併成一筆；一般品牌批次則依「規格＋品牌」合併。
+    if(mat.openBatches && mat.openBatches.length > 1){
+      const merged = [];
+      mat.openBatches.forEach(o => {
+        const key = o.note === '取消生產退回' ? 'void-return' : specKey(o.size, o.note);
+        const existing = merged.find(m => (m.note === '取消生產退回' ? 'void-return' : specKey(m.size, m.note)) === key);
+        if(existing){ existing.remaining = round2(existing.remaining + o.remaining); changed = true; }
+        else { merged.push(o); }
+      });
+      if(merged.length !== mat.openBatches.length){ mat.openBatches = merged; changed = true; }
+    }
   });
   products.forEach(p => {
     if(!p.recipes){
@@ -2774,6 +2805,14 @@ function openProduceConfirmModal(product, recipe, qty, plan, allOk, batchSelecti
       const details = [];
       plan.forEach(r => {
         if(!r.mat) return;
+        // 扣庫存前先留一份「當下狀態」的快照，之後如果要作廢這筆結算，可以直接把狀態精準還原
+        // 回結算前的樣子（哪些是整包、哪些是拆封中、各自的品牌與數量），而不是把退回的量
+        // 全部堆成一筆新的「取消生產退回」，導致同一個原物料底下出現一堆零散的重複項目。
+        const beforeState = r.mat.trackByPackage ? {
+          batches: JSON.parse(JSON.stringify(r.mat.batches || [])),
+          openBatches: JSON.parse(JSON.stringify(r.mat.openBatches || [])),
+          pendingShortage: r.mat.pendingShortage || 0
+        } : null;
         if(r.mat.trackByPackage){
           const chosen = batchSelections[r.mat.id];
           if(chosen && chosen.length){ consumeFromChosenBatches(r.mat, r.need, chosen); }
@@ -2782,7 +2821,7 @@ function openProduceConfirmModal(product, recipe, qty, plan, allOk, batchSelecti
           r.mat.stock = round2(r.mat.stock - r.need);
         }
         r.mat.updatedAt = Date.now();
-        details.push({ materialId:r.mat.id, materialName:r.mat.name, used:r.need, unit:r.mat.unit, stockAfter:r.mat.stock });
+        details.push({ materialId:r.mat.id, materialName:r.mat.name, used:r.need, unit:r.mat.unit, stockAfter:r.mat.stock, beforeState });
       });
       addLog({
         type:'produce', title:`生產結算「${product.name}」× ${qty}（${recipe.name}）`,
@@ -2889,9 +2928,22 @@ function confirmVoidProductionLog(logId){
         const mat = d.materialId ? materialById(d.materialId) : materials.find(m=>m.name===d.materialName);
         if(!mat) return;
         if(mat.trackByPackage){
-          if(!mat.openBatches) mat.openBatches = [];
-          mat.openBatches.push({ id:uid(), size:d.used, note:'取消生產退回', remaining:d.used });
-          recalcMaterialStock(mat);
+          if(d.beforeState){
+            // 有精確快照：直接把該原物料的整包/拆封中狀態還原回結算前的樣子，
+            // 不管當初是拆了哪個品牌的包裝，都會精準復原，不會另外堆出新的一筆。
+            mat.batches = JSON.parse(JSON.stringify(d.beforeState.batches || []));
+            mat.openBatches = JSON.parse(JSON.stringify(d.beforeState.openBatches || []));
+            mat.pendingShortage = d.beforeState.pendingShortage || 0;
+            recalcMaterialStock(mat);
+          } else {
+            // 沒有快照（此結算紀錄是舊版本產生的）：退回舊做法，但合併同一個「取消生產退回」項目，
+            // 避免每作廢一次就多長出一筆零散記錄。
+            if(!mat.openBatches) mat.openBatches = [];
+            const existing = mat.openBatches.find(o => o.note === '取消生產退回');
+            if(existing){ existing.remaining = round2(existing.remaining + d.used); }
+            else { mat.openBatches.push({ id:uid(), size:d.used, note:'取消生產退回', remaining:d.used }); }
+            recalcMaterialStock(mat);
+          }
         } else {
           mat.stock = round2(mat.stock + d.used);
         }
@@ -2902,7 +2954,7 @@ function confirmVoidProductionLog(logId){
       const shortTitle = product ? `${product.name} × ${log.qty||''}` : truncateForDisplay(log.title, 60);
       // voidRecord:true 標記這筆本身是「作廢紀錄」，不能再被作廢，避免無限巢狀
       addLog({ type:'produce', voidRecord:true, title:`已作廢生產結算：${shortTitle}`,
-        note:'已將原物料加回庫存（整包管理的原物料會列在「拆封中」，標註為取消生產退回）', details:[] });
+        note:'已將原物料還原回結算前的整包／拆封中狀態', details:[] });
       persist(); renderAll();
       showToast('已作廢並還原庫存', 'success');
     }
@@ -3036,6 +3088,30 @@ $('#btn-import-backup').addEventListener('change', (e) => {
   if(file) importFullBackupFile(file);
   e.target.value = '';
 });
+
+// 一鍵重置：清空目前所有資料，重新回到系統內建的範例資料狀態（方便測試期間重來）
+function resetToDemoData(){
+  const cloudWarning = cloudRef
+    ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 偵測到目前有連線雲端同步：重置後，範例資料也會一併推送覆蓋雲端上的資料，等於連其他已同步的裝置也會被重置。若不想影響其他裝置，請先到「雲端同步」頁籤停用同步，再回來重置。</p>`
+    : '';
+  openModal({
+    title:'重置為預設範例資料',
+    bodyHTML:`<p class="modal-msg">確定要清空目前所有原物料、產品配方、教學影片與異動紀錄，重新回到系統內建的範例資料嗎？</p>
+      <p class="modal-msg" style="color:var(--danger);margin-top:8px;font-weight:700;">此動作無法復原！建議先按「匯出完整備份」留一份現在的資料。</p>
+      ${cloudWarning}`,
+    confirmText:'確認重置',
+    danger:true,
+    onConfirm:()=>{
+      materials = []; products = []; logs = []; videos = [];
+      localStorage.removeItem(LS_KEYS.seeded);
+      seedDemoData();
+      persist();
+      renderAll();
+      showToast('已重置為預設範例資料', 'success');
+    }
+  });
+}
+$('#btn-reset-demo').addEventListener('click', resetToDemoData);
 
 function downloadCSV(filename, rows){
   const csv = rows.map(r => r.map(c => {
