@@ -618,11 +618,11 @@
 
     <div class="danger-banner">
       <div class="backup-banner-text">
-        <strong>🧹 測試資料太亂了？</strong>
-        <div class="field-help" style="margin-top:4px;">一鍵清空目前所有原物料、產品配方、教學影片與異動紀錄，重新回到系統內建的範例資料狀態，方便重新測試。<strong>這個動作無法復原</strong>，建議先「匯出完整備份」留一份現在的資料再重置。</div>
+        <strong>🧹 資料太亂想重來？</strong>
+        <div class="field-help" style="margin-top:4px;">一鍵清空目前所有原物料、產品配方、教學影片與異動紀錄，變成完全空白的狀態（不會恢復成範例資料，需要自己重新輸入）。<strong>這個動作無法復原</strong>，建議先「匯出完整備份」留一份現在的資料再清空。</div>
       </div>
       <div class="backup-banner-actions">
-        <button class="btn btn-outline btn-sm" id="btn-reset-demo" style="color:var(--danger);border-color:var(--danger);">🔄 重置為預設範例資料</button>
+        <button class="btn btn-outline btn-sm" id="btn-reset-demo" style="color:var(--danger);border-color:var(--danger);">🗑 清空全部資料</button>
       </div>
     </div>
 
@@ -3381,29 +3381,28 @@ $('#btn-import-backup').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-// 一鍵重置：清空目前所有資料，重新回到系統內建的範例資料狀態（方便測試期間重來）
-function resetToDemoData(){
+// 一鍵清空：清空目前所有資料，維持空白狀態（不會重新填入示範資料）
+function clearAllData(){
   const cloudWarning = cloudRef
-    ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 偵測到目前有連線雲端同步：重置後，範例資料也會一併推送覆蓋雲端上的資料，等於連其他已同步的裝置也會被重置。若不想影響其他裝置，請先到「雲端同步」頁籤停用同步，再回來重置。</p>`
+    ? `<p class="modal-msg" style="color:var(--danger);margin-top:10px;">⚠ 偵測到目前有連線雲端同步：清空後，這個空白狀態也會一併推送覆蓋雲端上的資料，等於連其他已同步的裝置也會被清空。若不想影響其他裝置，請先到「雲端同步」頁籤停用同步，再回來清空。</p>`
     : '';
   openModal({
-    title:'重置為預設範例資料',
-    bodyHTML:`<p class="modal-msg">確定要清空目前所有原物料、產品配方、教學影片與異動紀錄，重新回到系統內建的範例資料嗎？</p>
+    title:'清空全部資料',
+    bodyHTML:`<p class="modal-msg">確定要清空目前所有原物料、產品配方、教學影片與異動紀錄嗎？清空後畫面會變成完全空白，不會恢復成內建範例資料。</p>
       <p class="modal-msg" style="color:var(--danger);margin-top:8px;font-weight:700;">此動作無法復原！建議先按「匯出完整備份」留一份現在的資料。</p>
       ${cloudWarning}`,
-    confirmText:'確認重置',
+    confirmText:'確認清空',
     danger:true,
     onConfirm:()=>{
       materials = []; products = []; logs = []; videos = [];
-      localStorage.removeItem(LS_KEYS.seeded);
-      seedDemoData();
+      saveLS(LS_KEYS.seeded, true); // 標記已初始化過，避免下次載入時又自動補回示範資料
       persist();
       renderAll();
-      showToast('已重置為預設範例資料', 'success');
+      showToast('已清空所有資料', 'success');
     }
   });
 }
-$('#btn-reset-demo').addEventListener('click', resetToDemoData);
+$('#btn-reset-demo').addEventListener('click', clearAllData);
 
 function downloadCSV(filename, rows){
   const csv = rows.map(r => r.map(c => {
