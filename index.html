@@ -464,6 +464,26 @@
   .recipe-view-block:last-child{margin-bottom:0;}
   .recipe-view-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13.5px;}
 
+  .stage-block{
+    background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:10px;margin-bottom:10px;
+  }
+  .stage-block-head{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .stage-block-head .stage-name{flex:1;font-size:13px;}
+  .stage-view-block{margin-bottom:12px;}
+  .stage-view-block:last-child{margin-bottom:0;}
+  .stage-view-label{
+    font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;
+    margin-bottom:4px;display:flex;align-items:center;gap:6px;
+  }
+  .pr-base-recipe-info{
+    background:var(--sage-soft);border:1px solid #BEE0C4;border-radius:10px;
+    padding:10px 14px;font-size:13.5px;font-weight:700;color:#2E5E38;
+  }
+  .pr-base-recipe-info select{
+    background:var(--surface);border:1px solid #BEE0C4;color:#2E5E38;font-weight:700;font-size:13.5px;
+  }
+
   .material-group{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
     box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px;
@@ -676,13 +696,17 @@
             <select id="pr-select"></select>
           </div>
           <div class="field">
-            <label>配方版本</label>
-            <select id="pr-recipe-select"></select>
+            <label>製作數量</label>
+            <input type="number" id="pr-qty" min="1" value="1">
           </div>
         </div>
         <div class="field">
-          <label>製作數量</label>
-          <input type="number" id="pr-qty" min="1" value="1">
+          <label>主配方<span class="field-help" style="display:inline;">（每次生產必定包含，不可取消）</span></label>
+          <div id="pr-base-recipe-info" class="pr-base-recipe-info"></div>
+        </div>
+        <div class="field" id="pr-addons-field">
+          <label>疊加口味調整／客製化配方<span class="field-help" style="display:inline;">（可複選，用量會與主配方加總計算）</span></label>
+          <div id="pr-recipe-addons" class="video-product-checklist"></div>
         </div>
         <div id="pr-banner"></div>
         <div id="pr-table"></div>
@@ -1031,22 +1055,24 @@ function seedDemoData(){
     m('鮮奶','ml', 2000, 500, '蛋奶類'),
     m('杯子蛋糕紙模','個', 60, 20, '包材類'),
     m('香草莢醬','g', 80, 20, '調味粉類'),
+    m('可可粉','g', 400, 100, '調味粉類'),
   ];
   const findId = n => materials.find(x=>x.name===n).id;
-  const baseIngredients = [
-    { materialId:findId('中筋麵粉'), qty:25 },
-    { materialId:findId('細砂糖'), qty:20 },
-    { materialId:findId('無鹽奶油'), qty:18 },
-    { materialId:findId('雞蛋'), qty:0.3 },
-    { materialId:findId('鮮奶'), qty:10 },
-    { materialId:findId('杯子蛋糕紙模'), qty:1 },
-    { materialId:findId('香草莢醬'), qty:0.5 },
-  ];
+  const stage = (name, ingredientsSpec) => ({
+    id:uid(), name, ingredients: ingredientsSpec.map(([matName, qty]) => ({ materialId:findId(matName), qty }))
+  });
+
   products = [{
     id:uid(), name:'香草杯子蛋糕（單顆）', note:'基礎款香草杯子蛋糕配方，單位為 1 顆',
     recipes:[
-      { id:uid(), name:'主配方', type:'base', ingredients:baseIngredients },
-      { id:uid(), name:'巧克力口味調整', type:'flavor', ingredients: baseIngredients.map(i=>({...i})) },
+      { id:uid(), name:'主配方', type:'base', stages:[
+        stage('', [['中筋麵粉',25],['細砂糖',20],['無鹽奶油',18],['雞蛋',0.3],['鮮奶',10],['杯子蛋糕紙模',1],['香草莢醬',0.5]]),
+      ]},
+      // 口味調整配方只需列出「額外新增」的用量（例如可可粉、多加的糖），不需要重複整份主配方，
+      // 生產結算時系統會自動把主配方 + 這裡選到的配方加總計算。
+      { id:uid(), name:'巧克力口味調整', type:'flavor', stages:[
+        stage('', [['可可粉',8],['細砂糖',5]]),
+      ]},
     ],
     photo:'', description:'以馬達加斯加香草莢醬與新鮮奶油製作，口感濕潤鬆軟，是店內招牌基礎款。',
     ingredientsLabel:'中筋麵粉、細砂糖、雞蛋、無鹽奶油、鮮奶、香草莢醬',
@@ -1054,6 +1080,27 @@ function seedDemoData(){
     storageMethod:'室溫陰涼處，避免陽光直射',
     shelfLife:'常溫 2 天／冷藏 5 天',
     listPrice:65, salePrice:55,
+    updatedAt:Date.now()
+  }, {
+    // 示範「巧遇版本」：主配方＋口味調整配方組合，並展示同一項原物料（中筋麵粉、可可粉）
+    // 因為投入生產的時間點不同，在同一份配方裡分成不同階段個別列出。
+    id:uid(), name:'巧遇特調・雙層可可捲心蛋糕', note:'巧遇版本示範：主配方（巧遇特調）＋口味調整配方（巧遇特調）組合，並展示同原料跨階段用量',
+    recipes:[
+      { id:uid(), name:'主配方（巧遇特調）', type:'base_qy', stages:[
+        stage('蛋糕體製作', [['中筋麵粉',30],['細砂糖',22],['雞蛋',0.4],['鮮奶',12]]),
+        stage('表層灑粉裝飾', [['中筋麵粉',5]]), // 同樣是中筋麵粉，但這裡是裝飾用途、不同投入時間點
+      ]},
+      { id:uid(), name:'巧克力可可加量版（巧遇特調）', type:'flavor_qy', stages:[
+        stage('可可內餡調製', [['可可粉',10],['無鹽奶油',8]]),
+        stage('表層可可粉裝飾', [['可可粉',3]]), // 同樣是可可粉，但用在不同階段
+      ]},
+    ],
+    photo:'', description:'巧遇。甜心屋特調款：外層雙重灑粉，內餡加量可可，口感層次更豐富。',
+    ingredientsLabel:'中筋麵粉、細砂糖、雞蛋、鮮奶、可可粉、無鹽奶油',
+    cautions:'本產品含麩質、蛋、奶製品，過敏體質請留意',
+    storageMethod:'冷藏保存',
+    shelfLife:'冷藏 4 天',
+    listPrice:78, salePrice:78,
     updatedAt:Date.now()
   }];
   videos = [];
@@ -1107,8 +1154,24 @@ function migrateLegacyData(){
   });
   products.forEach(p => {
     if(!p.recipes){
-      p.recipes = [{ id:uid(), name:'主配方', type:'base', ingredients: p.ingredients || [] }];
+      p.recipes = [{ id:uid(), name:'主配方', type:'base', stages:[{ id:uid(), name:'', ingredients: p.ingredients || [] }] }];
       delete p.ingredients;
+      changed = true;
+    }
+    // 舊版配方是「單一 ingredients 陣列」，轉成「單一階段」包起來，確保有 stages 結構
+    p.recipes.forEach(r => {
+      if(!r.stages){
+        r.stages = [{ id:uid(), name:'', ingredients: r.ingredients || [] }];
+        delete r.ingredients;
+        changed = true;
+      }
+    });
+    // 確保每個產品恰好有一個「主配方類」（主配方／主配方（巧遇特調）皆算）：
+    // 若都沒有，把第一個配方設為主配方；若超過一個，只保留第一個為主配方類，其餘改為口味調整配方
+    const baseOnes = p.recipes.filter(r => isBaseRecipeType(r.type));
+    if(baseOnes.length === 0 && p.recipes.length > 0){ p.recipes[0].type = 'base'; changed = true; }
+    if(baseOnes.length > 1){
+      baseOnes.slice(1).forEach(r => { r.type = (r.type === 'base_qy') ? 'flavor_qy' : 'flavor'; });
       changed = true;
     }
   });
@@ -1362,7 +1425,7 @@ function switchTab(tab){
    MATERIALS：原物料 CRUD
 ========================================================= */
 function materialUsageCount(materialId){
-  return products.filter(p => (p.recipes||[]).some(r => r.ingredients.some(i => i.materialId === materialId))).length;
+  return products.filter(p => (p.recipes||[]).some(r => (r.stages||[]).some(s => s.ingredients.some(i => i.materialId === materialId)))).length;
 }
 
 function renderMaterials(){
@@ -1949,38 +2012,89 @@ function addIngredientRow(container, materialId='', qty=''){
   container.appendChild(row);
 }
 
+const RECIPE_TYPE_LABELS = {
+  base: '主配方',
+  flavor: '口味調整配方',
+  base_qy: '主配方（巧遇特調）',
+  flavor_qy: '口味調整配方（巧遇特調）',
+  custom: '客製化調整配方', // 舊版資料相容用，新版表單不再提供這個選項
+};
 function recipeTypeLabel(type){
-  return type === 'flavor' ? '口味調整配方' : (type === 'custom' ? '客製化調整配方' : '主配方');
+  return RECIPE_TYPE_LABELS[type] || '主配方';
 }
 function recipeTypeBadgeClass(type){
-  return type === 'flavor' ? 'badge-warn' : (type === 'custom' ? 'badge-accent' : 'badge-ok');
+  if(type === 'flavor' || type === 'flavor_qy') return 'badge-warn';
+  if(type === 'custom') return 'badge-accent';
+  return 'badge-ok'; // base、base_qy
+}
+// 「主配方」與「主配方（巧遇特調）」在生產結算的邏輯上都算是該產品「必定包含」的主要配方
+function isBaseRecipeType(type){
+  return type === 'base' || type === 'base_qy';
 }
 
-// 新增一個「配方版本」區塊（主配方／口味調整配方／客製化調整配方），內含獨立的原物料清單
+// 新增一個「階段」區塊（代表同一配方裡不同的投入生產時間點），內含獨立的原物料清單。
+// 即使同一項原物料在不同階段重複用到也沒關係（例如麵糊階段用一次麵粉、灑粉裝飾階段又用一次）。
+function addStageBlock(container, stage){
+  const block = document.createElement('div');
+  block.className = 'stage-block';
+  const sid = (stage && stage.id) || uid();
+  block.dataset.sid = sid;
+  block.innerHTML = `
+    <div class="stage-block-head">
+      <input type="text" class="stage-name" placeholder="階段名稱（選填），例如：麵糊製作">
+      <button type="button" class="btn btn-ghost btn-sm stage-remove-btn" style="color:var(--danger);" title="刪除此階段">✕ 階段</button>
+    </div>
+    <div class="ing-rows"></div>
+    <button type="button" class="btn btn-outline btn-sm add-ing-btn" style="margin-top:4px;">＋ 新增材料</button>
+  `;
+  block.querySelector('.stage-name').value = (stage && stage.name) || '';
+  const rowsBox = block.querySelector('.ing-rows');
+  const ingredients = (stage && stage.ingredients) || [];
+  if(ingredients.length){ ingredients.forEach(i => addIngredientRow(rowsBox, i.materialId, i.qty)); }
+  else { addIngredientRow(rowsBox); }
+  block.querySelector('.add-ing-btn').addEventListener('click', () => addIngredientRow(rowsBox));
+  block.querySelector('.stage-remove-btn').addEventListener('click', () => {
+    if(container.querySelectorAll('.stage-block').length <= 1){
+      showToast('至少需保留一個階段', 'error'); return;
+    }
+    block.remove();
+  });
+  container.appendChild(block);
+  return block;
+}
+
+// 新增一個「配方版本」區塊（主配方／口味調整配方／主配方（巧遇特調）／口味調整配方（巧遇特調）），內含一或多個「階段」
 function addRecipeBlock(container, recipe){
   const block = document.createElement('div');
   block.className = 'recipe-block';
   const rid = (recipe && recipe.id) || uid();
   block.dataset.rid = rid;
+  const curType = (recipe && recipe.type) || 'base';
+  // 相容舊資料：若既有配方的類型是已經不再提供選擇的舊選項（例如 custom），額外補一個選項讓它能正確顯示，不會被悄悄改掉
+  const legacyOption = (curType === 'custom') ? `<option value="custom">${esc(RECIPE_TYPE_LABELS.custom)}</option>` : '';
   block.innerHTML = `
     <div class="recipe-block-head">
       <input type="text" class="recipe-name" placeholder="配方名稱，例如：主配方" value="${recipe?esc(recipe.name||''):''}">
       <select class="recipe-type">
         <option value="base">主配方</option>
         <option value="flavor">口味調整配方</option>
-        <option value="custom">客製化調整配方</option>
+        <option value="base_qy">主配方（巧遇特調）</option>
+        <option value="flavor_qy">口味調整配方（巧遇特調）</option>
+        ${legacyOption}
       </select>
       <button type="button" class="btn btn-ghost btn-sm recipe-remove-btn" style="color:var(--danger);" title="刪除此配方版本">✕ 刪除</button>
     </div>
-    <div class="ing-rows"></div>
-    <button type="button" class="btn btn-outline btn-sm add-ing-btn" style="margin-top:4px;">＋ 新增材料</button>
+    <div class="field-help" style="margin-bottom:8px;">可依「投入生產的時間點」分成不同階段；生產結算時會以「主配方」（一般或巧遇特調版本）為基礎，再疊加所選擇的口味調整配方一起計算用量。</div>
+    <div class="stage-list"></div>
+    <button type="button" class="btn btn-outline btn-sm add-stage-btn" style="margin-top:4px;">＋ 新增階段</button>
   `;
-  block.querySelector('.recipe-type').value = (recipe && recipe.type) || 'base';
-  const rowsBox = block.querySelector('.ing-rows');
-  const ingredients = (recipe && recipe.ingredients) || [];
-  if(ingredients.length){ ingredients.forEach(i => addIngredientRow(rowsBox, i.materialId, i.qty)); }
-  else { addIngredientRow(rowsBox); }
-  block.querySelector('.add-ing-btn').addEventListener('click', () => addIngredientRow(rowsBox));
+  block.querySelector('.recipe-type').value = curType;
+  const stageListBox = block.querySelector('.stage-list');
+  // 相容舊資料：若是舊版單一 ingredients 陣列（沒有 stages），包成一個沒有名稱的階段
+  const stages = (recipe && recipe.stages) || (recipe && recipe.ingredients ? [{ id:uid(), name:'', ingredients:recipe.ingredients }] : []);
+  if(stages.length){ stages.forEach(s => addStageBlock(stageListBox, s)); }
+  else { addStageBlock(stageListBox); }
+  block.querySelector('.add-stage-btn').addEventListener('click', () => addStageBlock(stageListBox));
   block.querySelector('.recipe-remove-btn').addEventListener('click', () => {
     if(container.querySelectorAll('.recipe-block').length <= 1){
       showToast('至少需保留一個配方版本', 'error'); return;
@@ -2067,11 +2181,11 @@ function openProductForm(editId){
       if(existingRecipes.length){
         existingRecipes.forEach(r => addRecipeBlock(recipesBox, r));
       } else {
-        addRecipeBlock(recipesBox, { name:'主配方', type:'base', ingredients:[] });
+        addRecipeBlock(recipesBox, { name:'主配方', type:'base', stages:[] });
       }
       $('#btn-add-recipe', box).addEventListener('click', () => {
         const count = recipesBox.querySelectorAll('.recipe-block').length;
-        addRecipeBlock(recipesBox, { name: count===0?'主配方':`口味調整配方 ${count}`, type: count===0?'base':'flavor', ingredients:[] });
+        addRecipeBlock(recipesBox, { name: count===0?'主配方':`口味調整配方 ${count}`, type: count===0?'base':'flavor', stages:[] });
       });
       $('#f-pname', box).focus();
 
@@ -2133,24 +2247,36 @@ function openProductForm(editId){
       const recipeBlocks = $$('.recipe-block', box);
       if(recipeBlocks.length === 0){ showToast('請至少建立一個配方版本', 'error'); return false; }
       const recipes = [];
+      let baseCount = 0;
       for(const block of recipeBlocks){
         const rName = block.querySelector('.recipe-name').value.trim() || '未命名配方';
         const rType = block.querySelector('.recipe-type').value;
-        const rows = block.querySelectorAll('.ing-row');
-        if(rows.length === 0){ showToast(`配方「${rName}」請至少新增一項所需材料`, 'error'); return false; }
-        const ingredients = [];
-        const seen = new Set();
-        for(const row of rows){
-          const mid = row.querySelector('.ing-material').value;
-          const qty = parseFloat(row.querySelector('.ing-qty').value);
-          if(!mid){ showToast(`配方「${rName}」每一列都需要選擇原物料`, 'error'); return false; }
-          if(isNaN(qty) || qty <= 0){ showToast(`配方「${rName}」材料用量需大於 0`, 'error'); return false; }
-          if(seen.has(mid)){ showToast(`配方「${rName}」有重複的原物料，請合併用量`, 'error'); return false; }
-          seen.add(mid);
-          ingredients.push({ materialId:mid, qty });
+        if(isBaseRecipeType(rType)) baseCount++;
+        const stageBlocks = block.querySelectorAll('.stage-block');
+        if(stageBlocks.length === 0){ showToast(`配方「${rName}」請至少建立一個階段`, 'error'); return false; }
+        const stages = [];
+        for(const sBlock of stageBlocks){
+          const sName = sBlock.querySelector('.stage-name').value.trim();
+          const rows = sBlock.querySelectorAll('.ing-row');
+          if(rows.length === 0){ showToast(`配方「${rName}」的階段請至少新增一項所需材料`, 'error'); return false; }
+          const ingredients = [];
+          const seen = new Set();
+          for(const row of rows){
+            const mid = row.querySelector('.ing-material').value;
+            const qty = parseFloat(row.querySelector('.ing-qty').value);
+            if(!mid){ showToast(`配方「${rName}」每一列都需要選擇原物料`, 'error'); return false; }
+            if(isNaN(qty) || qty <= 0){ showToast(`配方「${rName}」材料用量需大於 0`, 'error'); return false; }
+            if(seen.has(mid)){ showToast(`配方「${rName}」同一階段內有重複的原物料，請合併用量（不同階段則可以重複使用同一項原物料）`, 'error'); return false; }
+            seen.add(mid);
+            ingredients.push({ materialId:mid, qty });
+          }
+          stages.push({ id: sBlock.dataset.sid || uid(), name:sName, ingredients });
         }
-        recipes.push({ id: block.dataset.rid || uid(), name:rName, type:rType, ingredients });
+        recipes.push({ id: block.dataset.rid || uid(), name:rName, type:rType, stages });
       }
+      if(baseCount === 0){ showToast('請至少將一個配方版本設為「主配方」或「主配方（巧遇特調）」', 'error'); return false; }
+      // 註：主配方類（主配方／主配方（巧遇特調））可以同時存在多個，代表這個產品有多種「基礎版本」可選，
+      // 生產結算時使用者會先選要用哪一個當基礎，再疊加口味調整配方，不強制只能有一個。
 
       const listPriceRaw = $('#f-listprice', box).value;
       const salePriceRaw = $('#f-saleprice', box).value;
@@ -2251,20 +2377,28 @@ function renderProducts(){
   box.innerHTML = products.map(p => {
     const recipes = p.recipes || [];
     const recipesHTML = recipes.map(r => {
-      const rows = r.ingredients.map(i => {
-        const m = materialById(i.materialId);
-        if(!m) return `<tr><td colspan="3" style="color:var(--danger);">⚠ 原物料已被刪除</td></tr>`;
-        return `<tr><td>${esc(m.name)}</td><td class="num-cell">${fmtNum(i.qty)}</td><td>${esc(m.unit)}</td></tr>`;
+      const stages = r.stages || [];
+      const stagesHTML = stages.map((s, si) => {
+        const rows = s.ingredients.map(i => {
+          const m = materialById(i.materialId);
+          if(!m) return `<tr><td colspan="3" style="color:var(--danger);">⚠ 原物料已被刪除</td></tr>`;
+          return `<tr><td>${esc(m.name)}</td><td class="num-cell">${fmtNum(i.qty)}</td><td>${esc(m.unit)}</td></tr>`;
+        }).join('');
+        const stageLabel = s.name ? esc(s.name) : (stages.length > 1 ? `第 ${si+1} 階段` : '');
+        return `<div class="stage-view-block">
+          ${stageLabel ? `<div class="stage-view-label">🕐 ${stageLabel}</div>` : ''}
+          <table>
+            <thead><tr><th>原物料</th><th>單位用量</th><th>單位</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
       }).join('');
       return `<div class="recipe-view-block">
         <div class="recipe-view-head">
           <strong>${esc(r.name)}</strong>
           <span class="badge ${recipeTypeBadgeClass(r.type)}">${recipeTypeLabel(r.type)}</span>
         </div>
-        <table>
-          <thead><tr><th>原物料</th><th>單位用量</th><th>單位</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+        ${stagesHTML}
       </div>`;
     }).join('');
 
@@ -2695,21 +2829,23 @@ function renderProductionSelect(){
     if(prev && productById(prev)) sel.value = prev;
   }
 }
-function renderRecipeSelect(product){
-  const sel = $('#pr-recipe-select');
-  const recipes = product ? (product.recipes || []) : [];
-  if(recipes.length === 0){
-    sel.innerHTML = `<option value="">（此產品尚無配方版本）</option>`;
-    return;
-  }
-  sel.innerHTML = recipes.map(r => `<option value="${r.id}">${esc(r.name)}（${recipeTypeLabel(r.type)}）</option>`).join('');
-  // 預設選擇「主配方」（若有），否則選第一個
-  const base = recipes.find(r => r.type === 'base');
-  sel.value = (base || recipes[0]).id;
+// 把多個配方（各自可能有多個階段）的原物料用量加總成單一份清單（依基礎單位加總，同一項原物料
+// 即使分別出現在主配方與口味調整配方、或同一配方不同階段，也會正確加總，不會互相覆蓋或遺漏）
+function combineRecipeIngredients(recipes){
+  const map = new Map();
+  recipes.forEach(r => {
+    (r.stages||[]).forEach(s => {
+      (s.ingredients||[]).forEach(i => {
+        map.set(i.materialId, round2((map.get(i.materialId)||0) + i.qty));
+      });
+    });
+  });
+  return [...map.entries()].map(([materialId, qty]) => ({ materialId, qty }));
 }
 
-function computeProductionPlan(recipe, qty){
-  return recipe.ingredients.map(ing => {
+function computeProductionPlan(recipes, qty){
+  const combined = combineRecipeIngredients(recipes);
+  return combined.map(ing => {
     const mat = materialById(ing.materialId);
     const need = ing.qty * qty;
     const stock = mat ? mat.stock : 0;
@@ -2724,7 +2860,9 @@ function computeProductionPlan(recipe, qty){
 function renderProduction(){
   renderProductionSelect();
   const sel = $('#pr-select');
-  const recipeSel = $('#pr-recipe-select');
+  const baseInfoBox = $('#pr-base-recipe-info');
+  const addonsField = $('#pr-addons-field');
+  const addonsBox = $('#pr-recipe-addons');
   const qtyInput = $('#pr-qty');
   const bannerBox = $('#pr-banner');
   const tableBox = $('#pr-table');
@@ -2733,37 +2871,77 @@ function renderProduction(){
 
   if(products.length === 0){
     bannerBox.innerHTML = `<div class="prod-banner idle">尚未建立任何產品配方，請先至「產品配方」頁面建立。</div>`;
-    tableBox.innerHTML = '';
-    recipeSel.innerHTML = '';
+    tableBox.innerHTML = ''; baseInfoBox.innerHTML = ''; addonsBox.innerHTML = '';
     confirmBtn.disabled = true;
     return;
   }
 
-  function currentRecipe(){
-    const product = productById(sel.value);
-    if(!product) return null;
-    return (product.recipes||[]).find(r => r.id === recipeSel.value) || (product.recipes||[])[0] || null;
+  function baseRecipesOf(product){
+    const recipes = product ? (product.recipes||[]) : [];
+    return recipes.filter(r => isBaseRecipeType(r.type));
+  }
+  function addonRecipesOf(product){
+    const recipes = product ? (product.recipes||[]) : [];
+    return recipes.filter(r => !isBaseRecipeType(r.type));
+  }
+  function selectedBaseRecipe(product){
+    const bases = baseRecipesOf(product);
+    if(bases.length <= 1) return bases[0] || null;
+    const selectEl = $('#pr-base-recipe-select');
+    return bases.find(r => r.id === (selectEl && selectEl.value)) || bases[0];
+  }
+  function selectedAddonRecipes(product){
+    const checked = $$('#pr-recipe-addons input:checked').map(el => el.value);
+    return addonRecipesOf(product).filter(r => checked.includes(r.id));
+  }
+
+  function renderAddonChecklist(product){
+    const bases = baseRecipesOf(product);
+    const addons = addonRecipesOf(product);
+    if(bases.length === 0){
+      baseInfoBox.innerHTML = `<span style="color:var(--danger);">此產品尚未設定主配方</span>`;
+    } else if(bases.length === 1){
+      const b = bases[0];
+      baseInfoBox.innerHTML = `🍰 ${esc(b.name)}${b.stages&&b.stages.length>1?`（共 ${b.stages.length} 個階段）`:''}`;
+    } else {
+      // 這個產品有多個「主配方類」（例如一般版＋巧遇特調版），讓使用者選這次要用哪一個當基礎
+      baseInfoBox.innerHTML = `<select id="pr-base-recipe-select" style="width:100%;">${bases.map(b=>`<option value="${b.id}">🍰 ${esc(b.name)}${b.stages&&b.stages.length>1?`（共 ${b.stages.length} 個階段）`:''}</option>`).join('')}</select>`;
+      $('#pr-base-recipe-select').addEventListener('change', paint);
+    }
+    if(addons.length === 0){
+      addonsField.style.display = 'none';
+      addonsBox.innerHTML = '';
+    } else {
+      addonsField.style.display = 'block';
+      addonsBox.innerHTML = addons.map(r => `
+        <label class="video-product-check">
+          <input type="checkbox" value="${r.id}">
+          <span>${esc(r.name)}（${recipeTypeLabel(r.type)}）</span>
+        </label>`).join('');
+      $$('#pr-recipe-addons input').forEach(el => el.addEventListener('change', paint));
+    }
   }
 
   function paint(){
     const product = productById(sel.value);
-    const recipe = currentRecipe();
     const qty = Math.max(1, parseInt(qtyInput.value) || 1);
-    if(!product || !recipe){ tableBox.innerHTML=''; bannerBox.innerHTML=''; confirmBtn.disabled = true; return; }
-    const plan = computeProductionPlan(recipe, qty);
+    const base = product ? selectedBaseRecipe(product) : null;
+    if(!product || !base){ tableBox.innerHTML=''; bannerBox.innerHTML=''; confirmBtn.disabled = true; return; }
+    const recipes = [base, ...selectedAddonRecipes(product)];
+    const plan = computeProductionPlan(recipes, qty);
     const allOk = plan.every(r => r.sufficient);
     const shortfalls = plan.filter(r => !r.sufficient);
+    const recipeNames = recipes.map(r=>r.name).join('＋');
 
     bannerBox.innerHTML = allOk
-      ? `<div class="prod-banner ok">✓ 庫存充足，可直接以「${esc(recipe.name)}」製作 ${qty} 個「${esc(product.name)}」！</div>`
+      ? `<div class="prod-banner ok">✓ 庫存充足，可直接以「${esc(recipeNames)}」製作 ${qty} 個「${esc(product.name)}」！</div>`
       : `<div class="prod-banner bad">✕ 庫存不足，尚缺：${shortfalls.map(r=> `${esc(r.mat? r.mat.name : '（已刪除材料）')} ${fmtNum(Math.abs(r.remain))}${r.mat?esc(r.mat.unit):''}`).join('、')}</div>`;
 
     tableBox.innerHTML = `<table class="responsive-table">
-      <thead><tr><th>原物料</th><th>單位用量</th><th>本次需求</th><th>可用庫存</th><th>結算後剩餘</th><th>狀態</th></tr></thead>
+      <thead><tr><th>原物料</th><th>本次需求（已加總）</th><th>可用庫存</th><th>結算後剩餘</th><th>狀態</th></tr></thead>
       <tbody>${plan.map(r => `<tr>
         <td data-label="原物料">${r.mat ? esc(r.mat.name) : '<span style="color:var(--danger)">⚠ 已刪除材料</span>'}</td>
-        <td class="num-cell" data-label="單位用量">${fmtNum(r.ing.qty)} ${r.mat?esc(r.mat.unit):''}</td>
-        <td class="num-cell" data-label="本次需求">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td>
+        <td class="num-cell" data-label="本次需求（已加總）">${fmtNum(r.need)} ${r.mat?esc(r.mat.unit):''}</td>
         <td class="num-cell" data-label="可用庫存">${fmtNum(r.available)}${r.mat&&r.mat.pendingShortage>0?` <span class="ref-tag" style="color:var(--danger);background:var(--danger-soft);">已扣缺貨${fmtNum(r.mat.pendingShortage)}</span>`:''}</td>
         <td class="num-cell" data-label="結算後剩餘" style="color:${r.remain<0?'var(--danger)':'var(--ink)'}">${fmtNum(r.remain)}</td>
         <td data-label="狀態">${r.sufficient ? badgeHTML({level:'ok',label:'足夠'}) : badgeHTML({level:'danger',label:'不足'})}${r.willBreakPackage?` <span class="batch-tag">📦 需拆包</span>`:''}</td>
@@ -2773,28 +2951,29 @@ function renderProduction(){
     confirmBtn.disabled = !(allOk || override.checked);
   }
 
-  sel.onchange = () => { renderRecipeSelect(productById(sel.value)); paint(); };
-  renderRecipeSelect(productById(sel.value));
-  recipeSel.onchange = paint;
+  sel.onchange = () => { renderAddonChecklist(productById(sel.value)); paint(); };
+  renderAddonChecklist(productById(sel.value));
   qtyInput.oninput = paint;
   override.onchange = paint;
   paint();
 
   confirmBtn.onclick = () => {
     const product = productById(sel.value);
-    const recipe = currentRecipe();
+    const base = selectedBaseRecipe(product);
+    if(!base){ showToast('此產品尚未設定主配方，請先至「產品配方」補上', 'error'); return; }
+    const recipes = [base, ...selectedAddonRecipes(product)];
     const qty = Math.max(1, parseInt(qtyInput.value) || 1);
-    const plan = computeProductionPlan(recipe, qty);
+    const plan = computeProductionPlan(recipes, qty);
     const allOk = plan.every(r => r.sufficient);
     if(!allOk && !override.checked){ showToast('庫存不足，請補貨或勾選允許不足結算', 'error'); return; }
 
     const needChoice = plan.filter(r => r.willBreakPackage);
     if(needChoice.length > 0){
       openBatchChoiceQueue(needChoice, 0, {}, override.checked, (selections) => {
-        openProduceConfirmModal(product, recipe, qty, plan, allOk, selections);
+        openProduceConfirmModal(product, recipes, qty, plan, allOk, selections);
       });
     } else {
-      openProduceConfirmModal(product, recipe, qty, plan, allOk, {});
+      openProduceConfirmModal(product, recipes, qty, plan, allOk, {});
     }
   };
 }
@@ -2877,11 +3056,13 @@ function openBatchChoiceQueue(list, idx, selections, allowNegative, onDone){
   });
 }
 
-function openProduceConfirmModal(product, recipe, qty, plan, allOk, batchSelections){
+function openProduceConfirmModal(product, recipes, qty, plan, allOk, batchSelections){
+  const recipeNames = recipes.map(r=>r.name).join('＋');
+  const recipeIds = recipes.map(r=>r.id);
   openModal({
     title:'確認生產結算',
-    bodyHTML:`<p class="modal-msg">即將以「<strong>${esc(recipe.name)}</strong>」（${recipeTypeLabel(recipe.type)}）製作 <strong>${qty}</strong> 個「<strong>${esc(product.name)}</strong>」，
-      以下原物料將自動從庫存扣除：</p>
+    bodyHTML:`<p class="modal-msg">即將以「<strong>${esc(recipeNames)}</strong>」製作 <strong>${qty}</strong> 個「<strong>${esc(product.name)}</strong>」，
+      以下原物料將自動從庫存扣除（已將主配方與所選配方的用量加總）：</p>
       <table class="responsive-table" style="margin-top:10px;"><thead><tr><th>原物料</th><th>扣除量</th><th>拆封來源</th></tr></thead>
       <tbody>${plan.map(r=>{
         let sourceLabel = '—';
@@ -2924,9 +3105,9 @@ function openProduceConfirmModal(product, recipe, qty, plan, allOk, batchSelecti
         details.push({ materialId:r.mat.id, materialName:r.mat.name, used:r.need, unit:r.mat.unit, stockAfter:r.mat.stock, beforeState });
       });
       addLog({
-        type:'produce', title:`生產結算「${product.name}」× ${qty}（${recipe.name}）`,
+        type:'produce', title:`生產結算「${product.name}」× ${qty}（${recipeNames}）`,
         note: allOk ? '庫存充足，正常結算' : '庫存不足，超出部分記為缺貨待補（不會出現負數庫存）',
-        productId: product.id, recipeId: recipe.id, qty,
+        productId: product.id, recipeIds, qty,
         details
       });
       persist(); renderAll();
