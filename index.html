@@ -8,23 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F1ECF9;
+    --bg:#FBF2EF;
     --surface:#FFFFFF;
-    --surface-2:#F8F3FC;
-    --border:#E2D5F2;
-    --ink:#2E2148;
-    --ink-soft:#7C6E97;
-    --accent:#8B4FC7;
-    --accent-dark:#6B37A3;
-    --accent-soft:#EEE2FA;
-    --honey:#D4A72C;
-    --honey-soft:#FBF0D3;
-    --sage:#3F9E86;
-    --sage-soft:#DCF2EA;
-    --danger:#C0392B;
-    --danger-soft:#F7DCD7;
+    --surface-2:#FDF6F4;
+    --border:#F0DAD5;
+    --ink:#4A2E2C;
+    --ink-soft:#8C6A66;
+    --accent:#C97B72;
+    --accent-dark:#A85A52;
+    --accent-soft:#F5E0DC;
+    --honey:#E0A97E;
+    --honey-soft:#FAECD9;
+    --sage:#6E9B78;
+    --sage-soft:#E1EEE3;
+    --danger:#B3453A;
+    --danger-soft:#F5DCD8;
     --radius:14px;
-    --shadow:0 2px 12px rgba(75,45,130,0.08), 0 1px 3px rgba(75,45,130,0.06);
+    --shadow:0 2px 12px rgba(74,46,44,0.07), 0 1px 3px rgba(74,46,44,0.06);
+    --sidebar-bg:#4A2A2E;
+    --sidebar-bg-2:#5C363C;
+    --sidebar-text:#F5E7E2;
+    --sidebar-text-soft:rgba(245,231,226,0.6);
+    --sidebar-active-bg:#E3A69C;
+    --sidebar-active-text:#4A2A2E;
+    --sidebar-width:250px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;overflow-x:hidden;}
@@ -43,49 +50,65 @@
   .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
 
   /* ---------- layout ---------- */
-  .app{max-width:1180px;margin:0 auto;padding:28px 22px 90px;}
-  @media(max-width:640px){ .app{padding:16px 14px 90px;} }
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:16px;margin-bottom:26px;flex-wrap:wrap;
-  }
-  .brand{display:flex;align-items:center;gap:12px;min-width:0;}
-  .brand-mark{
-    width:44px;height:44px;border-radius:50%;
-    background:linear-gradient(160deg,#A163D8,var(--accent-dark));
-    display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
-    box-shadow:var(--shadow);
-  }
-  .brand h1{font-size:22px;font-weight:700;margin:0;line-height:1.2;}
-  .brand h1 .brand-sub{font-size:14px;font-weight:600;color:var(--accent);margin-left:2px;}
-  .brand p{margin:3px 0 0;color:var(--ink-soft);font-size:13px;}
+  .app-shell{display:flex;min-height:100vh;align-items:stretch;}
 
-  .tabs{
-    display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);
-    border-radius:999px;padding:5px;box-shadow:var(--shadow);flex-wrap:wrap;
-    max-width:100%;
+  .sidebar{
+    width:var(--sidebar-width);flex-shrink:0;background:var(--sidebar-bg);color:var(--sidebar-text);
+    display:flex;flex-direction:column;padding:26px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;
   }
-  .tab-btn{
-    border:none;background:transparent;padding:10px 16px;border-radius:999px;min-height:40px;
-    font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink-soft);
+  .sidebar-brand{
+    text-align:center;padding-bottom:20px;margin-bottom:14px;
+    border-bottom:1px solid rgba(237,232,216,0.14);position:relative;
+  }
+  .sidebar-logo{
+    width:56px;height:56px;border-radius:50%;margin:0 auto 12px;overflow:hidden;
+    background:linear-gradient(160deg,var(--honey),var(--accent-dark));
+    display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:var(--shadow);
+  }
+  .sidebar-logo img{width:100%;height:100%;object-fit:cover;}
+  .sidebar-brand h1{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin:0;color:var(--sidebar-text);}
+  .sidebar-brand p{margin:4px 0 0;font-size:12px;color:var(--sidebar-text-soft);}
+  .sidebar-brand-edit-btn{
+    margin-top:10px;background:rgba(245,231,226,0.12);border:1px solid rgba(245,231,226,0.25);
+    color:var(--sidebar-text-soft);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;
+    cursor:pointer;font-family:inherit;
+  }
+  .sidebar-brand-edit-btn:hover{background:rgba(245,231,226,0.2);color:var(--sidebar-text);}
+
+  .sidebar-nav{display:flex;flex-direction:column;gap:3px;flex:1;}
+  .sidebar-nav .tab-btn{
+    display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+    border:none;background:transparent;padding:11px 14px;border-radius:10px;min-height:auto;
+    font-family:inherit;font-weight:600;font-size:13.5px;color:var(--sidebar-text);
     cursor:pointer;transition:.15s;white-space:nowrap;
   }
-  .tab-btn.active{background:var(--accent);color:#fff;}
-  .tab-btn:not(.active):hover{background:var(--surface-2);color:var(--ink);}
+  .sidebar-nav .tab-btn .nav-icon{font-size:15px;flex-shrink:0;}
+  .sidebar-nav .tab-btn.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);font-weight:700;}
+  .sidebar-nav .tab-btn:not(.active):hover{background:rgba(237,232,216,0.08);}
 
-  @media(max-width:700px){
-    .topbar{gap:12px;}
-    .tabs{
-      flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
-      scrollbar-width:none;width:100%;justify-content:flex-start;
-      border-radius:14px;
+  .sidebar-footer{
+    font-size:11px;line-height:1.6;color:var(--sidebar-text-soft);padding-top:16px;margin-top:16px;
+    border-top:1px solid rgba(237,232,216,0.14);
+  }
+
+  .main-content{flex:1;min-width:0;padding:30px 34px 90px;}
+  @media(max-width:640px){ .main-content{padding:18px 16px 90px;} }
+
+  @media(max-width:900px){
+    .app-shell{flex-direction:column;}
+    .sidebar{
+      width:100%;height:auto;position:static;flex-direction:row;align-items:center;
+      padding:12px 14px;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;
     }
-    .tabs::-webkit-scrollbar{display:none;}
-    .tab-btn{flex:0 0 auto;padding:9px 14px;font-size:13px;}
-    .brand h1{font-size:18px;}
-    .brand h1 .brand-sub{display:block;margin-left:0;margin-top:1px;font-size:12px;}
-    .brand p{font-size:12px;}
-    .brand-mark{width:38px;height:38px;font-size:18px;}
+    .sidebar-brand{text-align:left;padding:0;margin:0;border:none;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .sidebar-logo{width:36px;height:36px;font-size:17px;margin:0;}
+    .sidebar-brand p{display:none;}
+    .sidebar-brand h1{font-size:14px;}
+    .sidebar-brand-edit-btn{display:none;}
+    .sidebar-nav{flex-direction:row;flex:0 0 auto;gap:4px;}
+    .sidebar-nav .tab-btn{padding:9px 12px;font-size:12.5px;}
+    .sidebar-nav .tab-btn .nav-icon{font-size:14px;}
+    .sidebar-footer{display:none;}
   }
 
   .panel{display:none;animation:fade .25s ease;}
@@ -533,26 +556,28 @@
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app-shell">
 
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark">🪄</div>
-      <div>
-        <h1>巧遇。甜心屋<span class="brand-sub">・魔法烘焙手帳</span></h1>
-        <p>✨ 原物料咒語庫 · 配方魔法陣 · 生產結算法術</p>
-      </div>
+  <aside class="sidebar">
+    <div class="sidebar-brand" id="sidebar-brand">
+      <div class="sidebar-logo" id="sidebar-logo">🪄</div>
+      <h1 id="sidebar-brand-name">巧遇。甜心屋</h1>
+      <p id="sidebar-brand-tagline">魔法烘焙手帳</p>
+      <button class="sidebar-brand-edit-btn" id="btn-edit-brand" title="編輯店名與 Logo">✎ 編輯</button>
     </div>
-    <nav class="tabs" id="tabs">
-      <button class="tab-btn active" data-tab="dashboard">🔮 儀表板</button>
-      <button class="tab-btn" data-tab="materials">🧪 原物料庫存</button>
-      <button class="tab-btn" data-tab="products">📖 產品配方</button>
-      <button class="tab-btn" data-tab="production">🪄 生產結算</button>
-      <button class="tab-btn" data-tab="videos">🎬 教學影片</button>
-      <button class="tab-btn" data-tab="history">📜 異動紀錄</button>
-      <button class="tab-btn" data-tab="sync">☁️ 雲端同步</button>
+    <nav class="sidebar-nav" id="tabs">
+      <button class="tab-btn active" data-tab="dashboard"><span class="nav-icon">🔮</span>儀表板</button>
+      <button class="tab-btn" data-tab="materials"><span class="nav-icon">🧪</span>原物料庫存</button>
+      <button class="tab-btn" data-tab="products"><span class="nav-icon">📖</span>產品配方</button>
+      <button class="tab-btn" data-tab="production"><span class="nav-icon">🪄</span>生產結算</button>
+      <button class="tab-btn" data-tab="videos"><span class="nav-icon">🎬</span>教學影片</button>
+      <button class="tab-btn" data-tab="history"><span class="nav-icon">📜</span>異動紀錄</button>
+      <button class="tab-btn" data-tab="sync"><span class="nav-icon">☁️</span>雲端同步</button>
     </nav>
-  </div>
+    <div class="sidebar-footer">資料僅儲存於本機瀏覽器<br>請定期於「儀表板」備份資料</div>
+  </aside>
+
+  <main class="main-content">
 
   <!-- ================= DASHBOARD ================= -->
   <section class="panel active" id="panel-dashboard">
@@ -779,7 +804,7 @@
     </div>
   </section>
 
-  <div class="footer-note">🪄 巧遇。甜心屋・魔法烘焙手帳｜資料儲存在本機瀏覽器（localStorage），僅此裝置可見；請至「儀表板」使用「匯出完整備份」定期保存所有資料，或至「雲端同步」設定多裝置自動同步。</div>
+  </main>
 </div>
 
 <div id="modal-root"></div>
@@ -814,6 +839,10 @@ let materials = loadArrayLS(LS_KEYS.materials);
 let products  = loadArrayLS(LS_KEYS.products);
 let logs      = loadArrayLS(LS_KEYS.logs);
 let videos    = loadArrayLS(LS_KEYS.videos);
+
+// ---- 品牌設定（店名／標語／自訂 Logo，讓使用者自己編輯，不用每次改都來問我）----
+const BRAND_LS_KEY = 'bakery_inv_brand';
+let brandConfig = loadLS(BRAND_LS_KEY, { logo:'', name:'巧遇。甜心屋', tagline:'魔法烘焙手帳' });
 
 // ---- 雲端同步狀態（變數宣告提前到這裡，因為 persist() 一開始就可能被呼叫到，需要先存在）----
 const CLOUD_LS_KEY = 'bakery_inv_cloud_config';
@@ -878,6 +907,77 @@ function compressImageFile(file, maxDim = 900, quality = 0.82){
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
+  });
+}
+
+// ---- 品牌設定：渲染側邊欄 Logo／店名／標語 ----
+function renderBrand(){
+  const logoBox = $('#sidebar-logo');
+  const nameEl = $('#sidebar-brand-name');
+  const tagEl = $('#sidebar-brand-tagline');
+  if(!logoBox) return;
+  logoBox.innerHTML = brandConfig.logo ? `<img src="${brandConfig.logo}" alt="店家 Logo">` : '🪄';
+  if(nameEl) nameEl.textContent = brandConfig.name || '巧遇。甜心屋';
+  if(tagEl) tagEl.textContent = brandConfig.tagline || '';
+  document.title = `${brandConfig.name || '巧遇。甜心屋'} · ${brandConfig.tagline || '魔法烘焙手帳'}`;
+}
+
+function openBrandEditForm(){
+  let logoData = brandConfig.logo || '';
+  const body = `
+    <div class="field">
+      <label>店家 Logo（選填，可上傳自己的圖片，不設定則顯示預設圖示）</label>
+      <div class="photo-thumb-grid" id="brand-logo-grid"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          ${logoData?'更換圖片':'上傳圖片'}<input type="file" id="brand-logo-input" accept="image/*" style="display:none;">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-brand-logo" style="color:var(--danger);">改回預設圖示</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>店名</label>
+      <input type="text" id="brand-name-input" placeholder="例如：巧遇。甜心屋" value="${esc(brandConfig.name||'')}">
+    </div>
+    <div class="field">
+      <label>標語／副標題（選填）</label>
+      <input type="text" id="brand-tagline-input" placeholder="例如：手作甜點工作室" value="${esc(brandConfig.tagline||'')}">
+    </div>
+  `;
+  openModal({
+    title:'編輯店名與 Logo',
+    bodyHTML: body,
+    confirmText:'儲存',
+    onMount:(box)=>{
+      $('#brand-name-input', box).focus();
+      const grid = $('#brand-logo-grid', box);
+      const input = $('#brand-logo-input', box);
+      function renderThumb(){
+        grid.innerHTML = logoData
+          ? `<div class="photo-thumb is-cover" data-id="logo"><img src="${logoData}" alt="Logo 預覽"></div>`
+          : `<div class="photo-thumb-empty">尚未上傳自訂 Logo</div>`;
+      }
+      renderThumb();
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if(!file) return;
+        try{
+          showToast('圖片處理中…', 'info');
+          logoData = await compressImageFile(file, 400, 0.85);
+          renderThumb();
+          showToast('Logo 已更新，記得按下方按鈕儲存', 'success');
+        } catch(e){ showToast('圖片上傳失敗：' + e.message, 'error'); }
+      });
+      $('#btn-remove-brand-logo', box).addEventListener('click', () => { logoData = ''; renderThumb(); });
+    },
+    onConfirm:(box)=>{
+      const name = $('#brand-name-input', box).value.trim();
+      if(!name){ showToast('請輸入店名', 'error'); return false; }
+      brandConfig = { logo:logoData, name, tagline: $('#brand-tagline-input', box).value.trim() };
+      saveLS(BRAND_LS_KEY, brandConfig);
+      renderBrand();
+      showToast('已更新店名與 Logo', 'success');
+    }
   });
 }
 
@@ -3146,6 +3246,8 @@ $('#btn-export-logs').addEventListener('click', () => {
 /* =========================================================
    綁定新增按鈕
 ========================================================= */
+$('#btn-edit-brand').addEventListener('click', openBrandEditForm);
+renderBrand();
 $('#btn-add-material').addEventListener('click', () => openMaterialForm(null));
 $('#m-filter-category').addEventListener('change', renderMaterials);
 $('#m-filter-text').addEventListener('input', renderMaterials);
@@ -3157,20 +3259,20 @@ $('#btn-add-product').addEventListener('click', () => openProductForm(null));
 function catalogStandaloneCSS(){
   return `
     *{box-sizing:border-box;}
-    body{margin:0;padding:32px 24px;background:#F1ECF9;color:#2E2148;font-family:'Manrope',system-ui,-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;}
+    body{margin:0;padding:32px 24px;background:#F5F1E6;color:#2B2A20;font-family:'Manrope',system-ui,-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;}
     h1{font-family:'Fraunces',Georgia,'Noto Serif TC',serif;font-size:24px;margin:0 0 4px;}
-    .catalog-sub{color:#7C6E97;font-size:13px;margin:0 0 26px;}
+    .catalog-sub{color:#6E6A57;font-size:13px;margin:0 0 26px;}
     .grid-3-catalog{display:grid;gap:18px;grid-template-columns:repeat(3,1fr);max-width:1180px;margin:0 auto;}
     @media(max-width:900px){.grid-3-catalog{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:560px){.grid-3-catalog{grid-template-columns:1fr;}}
-    .catalog-card{background:#fff;border:1px solid #E2D5F2;border-radius:14px;box-shadow:0 2px 12px rgba(75,45,130,0.08);overflow:hidden;display:flex;flex-direction:column;}
-    .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:#F8F3FC;}
-    .catalog-photo-empty{height:190px;background:linear-gradient(160deg,#EEE2FA,#F8F3FC);display:flex;align-items:center;justify-content:center;position:relative;}
-    .catalog-photo-empty-icon{font-size:44px;color:#8B4FC7;opacity:.5;}
-    .catalog-gallery{height:190px;position:relative;overflow:hidden;background:#F8F3FC;}
+    .catalog-card{background:#fff;border:1px solid #E3DCC8;border-radius:14px;box-shadow:0 2px 12px rgba(43,42,32,0.07);overflow:hidden;display:flex;flex-direction:column;}
+    .catalog-photo{height:190px;background-size:cover;background-position:center;background-color:#FAF7EF;}
+    .catalog-photo-empty{height:190px;background:linear-gradient(160deg,#EFE3C9,#FAF7EF);display:flex;align-items:center;justify-content:center;position:relative;}
+    .catalog-photo-empty-icon{font-size:44px;color:#B08A4E;opacity:.5;}
+    .catalog-gallery{height:190px;position:relative;overflow:hidden;background:#FAF7EF;}
     .catalog-gallery-track{display:flex;height:100%;width:100%;transition:transform .25s ease;}
     .catalog-gallery-slide{min-width:100%;height:100%;background-size:cover;background-position:center;}
-    .gallery-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.85);color:#2E2148;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+    .gallery-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.85);color:#2B2A20;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
     .gallery-prev{left:8px;} .gallery-next{right:8px;}
     .gallery-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;}
     .gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);cursor:pointer;}
@@ -3179,14 +3281,14 @@ function catalogStandaloneCSS(){
     .catalog-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1;}
     .catalog-name{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;margin:0;}
     .catalog-price-row{display:flex;align-items:baseline;gap:8px;}
-    .catalog-price-sale{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px;color:#6B37A3;}
-    .catalog-price-list{font-family:ui-monospace,monospace;font-size:13px;color:#7C6E97;text-decoration:line-through;margin-left:8px;}
-    .catalog-empty-price{color:#7C6E97;font-size:13px;}
-    .catalog-desc{font-size:13px;color:#2E2148;line-height:1.6;}
-    .catalog-meta{display:flex;flex-direction:column;gap:6px;margin-top:2px;border-top:1px dashed #E2D5F2;padding-top:10px;}
+    .catalog-price-sale{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px;color:#8C6C39;}
+    .catalog-price-list{font-family:ui-monospace,monospace;font-size:13px;color:#6E6A57;text-decoration:line-through;margin-left:8px;}
+    .catalog-empty-price{color:#6E6A57;font-size:13px;}
+    .catalog-desc{font-size:13px;color:#2B2A20;line-height:1.6;}
+    .catalog-meta{display:flex;flex-direction:column;gap:6px;margin-top:2px;border-top:1px dashed #E3DCC8;padding-top:10px;}
     .catalog-meta-row{font-size:12px;line-height:1.5;}
-    .catalog-meta-label{font-weight:700;color:#7C6E97;margin-right:4px;}
-    .catalog-footer{text-align:center;color:#7C6E97;font-size:11.5px;margin-top:30px;}
+    .catalog-meta-label{font-weight:700;color:#6E6A57;margin-right:4px;}
+    .catalog-footer{text-align:center;color:#6E6A57;font-size:11.5px;margin-top:30px;}
     @media print{ body{padding:12px;background:#fff;} .catalog-card{box-shadow:none;break-inside:avoid;} .gallery-nav,.gallery-dots{display:none;} }
   `;
 }
@@ -3216,12 +3318,14 @@ function catalogStandaloneDocument(){
   const now = fmtDate(Date.now());
   const scriptOpen = '<' + 'script>';
   const scriptClose = '<' + '/script>';
+  const storeName = brandConfig.name || '巧遇。甜心屋';
+  const logoImgTag = brandConfig.logo ? `<img src="${brandConfig.logo}" alt="${esc(storeName)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;">` : '🪄 ';
   return `<!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>巧遇。甜心屋・成品型錄</title>
+<title>${esc(storeName)}・成品型錄</title>
 <style>${catalogStandaloneCSS()}</style>
 </head><body>
-  <h1>🪄 巧遇。甜心屋・成品型錄</h1>
+  <h1>${logoImgTag}${esc(storeName)}・成品型錄</h1>
   <p class="catalog-sub">更新時間：${now}</p>
   <div class="grid-3-catalog">${cards}</div>
   <div class="catalog-footer">價格與供應內容如有異動，依店家最新公告為準。</div>
