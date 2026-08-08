@@ -718,7 +718,8 @@
           <li><strong style="color:var(--danger);">重要，容易漏掉：</strong>左側選單「建構 Build」→「Authentication」→「開始使用 Get started」→上方分頁選「Sign-in method」→ 找到清單裡的「匿名 Anonymous」→ 點進去打開「啟用 Enable」開關 → 儲存。（這一步沒做，等一下按「連線」會失敗）</li>
           <li>點左上角齒輪 ⚙️ →「專案設定 Project settings」→ 頁面下方「你的應用程式 Your apps」找不到應用程式的話，點 <code>&lt;/&gt;</code>（網頁）圖示新增一個，取個名字（例如 web）即可，不需要勾選 Firebase Hosting，一路「下一步」到完成</li>
           <li>應用程式建立後，畫面會顯示一段 <code>const firebaseConfig = {'{'}...{'}'}</code> 程式碼，整段選取複製；之後想再找這段設定，可以到「專案設定」一般頁籤下方「你的應用程式」，點你的網頁應用程式，選「設定 Config」</li>
-          <li>回到這裡，把整段貼到下方「Firebase 設定」欄位</li>
+          <li><strong style="color:var(--danger);">重要，容易漏掉：</strong>這段程式碼通常<strong>不會自動包含 <code>databaseURL</code></strong> 這一行。請另外到左側選單「Realtime Database」頁面，畫面最上方會顯示一個網址（例如 <code>https://你的專案id-default-rtdb.地區.firebasedatabase.app</code>），複製它，手動貼到 firebaseConfig 裡加一行 <code>databaseURL: "貼在這裡",</code>（前後留意要有逗號跟雙引號）</li>
+          <li>回到這裡，把整段（含手動加上 databaseURL 之後）貼到下方「Firebase 設定」欄位</li>
           <li>自訂一組「同步代碼」（例如店名縮寫＋隨機數字，不要用太簡單的字），<strong>所有裝置都要輸入完全相同的代碼</strong>才能同步到一起</li>
           <li>按「連線並開始同步」。之後回到 Realtime Database 的「規則 Rules」分頁，建議改成下方提供的安全規則，避免任何人都能讀寫你的資料</li>
         </ol>
@@ -798,12 +799,17 @@ let videos    = loadArrayLS(LS_KEYS.videos);
 
 // ---- 雲端同步狀態（變數宣告提前到這裡，因為 persist() 一開始就可能被呼叫到，需要先存在）----
 const CLOUD_LS_KEY = 'bakery_inv_cloud_config';
+const LOCAL_CHANGE_LS_KEY = 'bakery_inv_last_change_at';
 let cloudConfig = loadLS(CLOUD_LS_KEY, null); // { firebaseConfig, syncCode }
 let cloudApp = null, cloudDb = null, cloudRef = null, cloudAuth = null;
 let cloudStatus = 'off'; // off | connecting | on | error
 let cloudStatusMsg = '';
 let cloudLastSyncedAt = null;
-let cloudLastKnownRemoteTimestamp = 0;
+// 重要：這裡「不能」寫死從 0 開始，否則每次重新整理頁面、雲端同步重新連線時，
+// 就會誤以為雲端上「任何」資料都比本機新，把本機剛做好、可能連推送到雲端都還沒完成的
+// 最新異動（例如剛結算完的生產扣庫存）整個覆蓋回舊的版本。改成載入本機「最後修改時間」
+// 當作起始基準，只有雲端真的比這個時間點更新，才會被拉下來覆蓋本機。
+let cloudLastKnownRemoteTimestamp = loadLS(LOCAL_CHANGE_LS_KEY, 0);
 let cloudPushDebounceTimer = null;
 
 // 統一的資料保存入口：畫面上「新增/編輯/刪除」等操作最後都會呼叫這裡，
@@ -820,6 +826,9 @@ function persist(){
   if(!ok && typeof showToast === 'function'){
     showToast('⚠ 這筆修改沒有成功存到瀏覽器裡（可能是儲存空間已滿）。建議立即用「匯出完整備份」把資料存出來，並刪減一些成品照片後再繼續。', 'error');
   }
+  const changeTs = Date.now();
+  saveLS(LOCAL_CHANGE_LS_KEY, changeTs);
+  if(changeTs > cloudLastKnownRemoteTimestamp){ cloudLastKnownRemoteTimestamp = changeTs; }
   if(cloudRef && typeof pushToCloud === 'function'){ pushToCloud(); }
   return ok;
 }
@@ -977,6 +986,16 @@ function migrateLegacyData(){
     if(!v.segments){
       v.segments = v.url ? [{ id:uid(), label:'', url:v.url }] : [];
       delete v.url;
+      changed = true;
+    }
+  });
+  // 修復先前版本的臭蟲：「作廢紀錄」被誤判成可以再被作廢，導致標題像
+  // 「作廢生產結算「作廢生產結算「...」」」這樣無限往內疊。這裡把已經是「作廢紀錄」
+  // 的項目標記起來（voidRecord:true），讓它們之後不會再被誤觸發，並把過長的標題截短。
+  logs.forEach(l => {
+    if(l.type === 'produce' && l.voidRecord === undefined && typeof l.title === 'string' && l.title.indexOf('作廢生產結算') === 0){
+      l.voidRecord = true;
+      if(l.title.length > 80){ l.title = l.title.slice(0, 40) + '…（先前版本臭蟲產生的過長標題，已自動截短）'; }
       changed = true;
     }
   });
@@ -2794,6 +2813,11 @@ function logTypeMeta(type){
   return map[type] || { label:type, cls:'badge-neutral' };
 }
 
+function truncateForDisplay(text, max){
+  if(!text) return '';
+  return text.length > max ? text.slice(0, max) + '…（內容過長，已省略）' : text;
+}
+
 function renderHistory(){
   const box = $('#history-list');
   const typeFilter = $('#f-filter-type').value;
@@ -2826,14 +2850,15 @@ function renderHistory(){
         ? `<div class="log-detail">${l.details.map(d=>`<span>${esc(d.materialName)} -${fmtNum(d.used)}${esc(d.unit||'')}</span>`).join('')}</div>`
         : '';
       const isVoided = !!l.reversed;
-      const canVoid = l.type === 'produce' && !isVoided;
+      // 「作廢紀錄」本身（voidRecord）不能再被作廢，避免無限巢狀（這是先前版本的臭蟲，已修正）
+      const canVoid = l.type === 'produce' && !isVoided && !l.voidRecord;
       const actionCell = canVoid
         ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger);" data-act="void" data-id="${l.id}">作廢還原庫存</button>`
-        : (isVoided ? `<span class="badge badge-neutral">已作廢</span>` : '—');
+        : (isVoided ? `<span class="badge badge-neutral">已作廢</span>` : (l.voidRecord ? `<span class="badge badge-neutral">作廢紀錄</span>` : '—'));
       return `<tr>
         <td class="num-cell" data-label="時間">${fmtDate(l.timestamp)}</td>
         <td data-label="類型"><span class="badge ${meta.cls}">${meta.label}</span></td>
-        <td class="cell-block" data-label="內容" style="${isVoided?'opacity:.55;text-decoration:line-through;':''}">${esc(l.title)}${l.note?`<div class="log-detail" style="text-decoration:none;">${esc(l.note)}</div>`:''}${detailHTML}</td>
+        <td class="cell-block" data-label="內容" style="${isVoided?'opacity:.55;text-decoration:line-through;':''}">${esc(truncateForDisplay(l.title, 200))}${l.note?`<div class="log-detail" style="text-decoration:none;">${esc(truncateForDisplay(l.note, 200))}</div>`:''}${detailHTML}</td>
         <td data-label="數量變化">${qtyCell}</td>
         <td class="cell-actions" data-label="操作">${actionCell}</td>
       </tr>`;
@@ -2849,11 +2874,11 @@ function renderHistory(){
 // 並標記備註為退回，方便日後追蹤），原始紀錄保留但標示為已作廢，不會真的從歷史中消失。
 function confirmVoidProductionLog(logId){
   const log = logs.find(l => l.id === logId);
-  if(!log || log.type !== 'produce' || log.reversed) return;
+  if(!log || log.type !== 'produce' || log.reversed || log.voidRecord) return; // voidRecord 本身不可再作廢，防止巢狀
   const details = log.details || [];
   openModal({
     title:'作廢生產結算紀錄',
-    bodyHTML:`<p class="modal-msg">確定要作廢「<strong>${esc(log.title)}</strong>」嗎？系統會把當初扣除的原物料加回庫存：</p>
+    bodyHTML:`<p class="modal-msg">確定要作廢「<strong>${esc(truncateForDisplay(log.title, 120))}</strong>」嗎？系統會把當初扣除的原物料加回庫存：</p>
       <table class="responsive-table" style="margin-top:10px;"><thead><tr><th>原物料</th><th>將加回數量</th></tr></thead>
       <tbody>${details.map(d=>`<tr><td data-label="原物料">${esc(d.materialName)}</td><td class="num-cell" data-label="將加回數量">+${fmtNum(d.used)} ${esc(d.unit||'')}</td></tr>`).join('') || '<tr><td colspan="2">（此紀錄無詳細材料資料，僅會標示作廢）</td></tr>'}</tbody></table>
       <p class="modal-msg field-help" style="margin-top:10px;">此動作無法復原；原紀錄會保留在歷史中並標示「已作廢」，不會被刪除，以維持完整稽核軌跡。</p>`,
@@ -2865,7 +2890,6 @@ function confirmVoidProductionLog(logId){
         if(!mat) return;
         if(mat.trackByPackage){
           if(!mat.openBatches) mat.openBatches = [];
-          const key = specKey(d.used, '取消生產退回');
           mat.openBatches.push({ id:uid(), size:d.used, note:'取消生產退回', remaining:d.used });
           recalcMaterialStock(mat);
         } else {
@@ -2874,7 +2898,11 @@ function confirmVoidProductionLog(logId){
         mat.updatedAt = Date.now();
       });
       log.reversed = true;
-      addLog({ type:'produce', title:`作廢生產結算「${log.title}」`, note:'已將原物料加回庫存（整包管理的原物料會列在「拆封中」，標註為取消生產退回）', details:[] });
+      const product = log.productId ? productById(log.productId) : null;
+      const shortTitle = product ? `${product.name} × ${log.qty||''}` : truncateForDisplay(log.title, 60);
+      // voidRecord:true 標記這筆本身是「作廢紀錄」，不能再被作廢，避免無限巢狀
+      addLog({ type:'produce', voidRecord:true, title:`已作廢生產結算：${shortTitle}`,
+        note:'已將原物料加回庫存（整包管理的原物料會列在「拆封中」，標註為取消生產退回）', details:[] });
       persist(); renderAll();
       showToast('已作廢並還原庫存', 'success');
     }
@@ -3163,7 +3191,10 @@ function parseFirebaseConfigText(text){
   const match = text.match(/\{[\s\S]*\}/);
   if(!match) throw new Error('找不到用 { } 包起來的設定內容');
   const obj = (new Function('return (' + match[0] + ')'))();
-  if(!obj || !obj.apiKey || !obj.databaseURL){ throw new Error('設定內容缺少 apiKey 或 databaseURL，請確認整段有複製完整（包含 databaseURL 那一行）'); }
+  if(!obj || !obj.apiKey){ throw new Error('設定內容缺少 apiKey，請確認整段有複製完整'); }
+  if(!obj.databaseURL){
+    throw new Error('這段設定裡沒有 databaseURL 這一行——這是正常的，Firebase 註冊網頁應用程式時不會自動附上它。請到 Firebase 主控台「Realtime Database」頁面，畫面上方會顯示一個網址（長得像 https://你的專案id-default-rtdb.地區.firebasedatabase.app），把它複製起來，在下面貼的設定裡手動加一行，例如：databaseURL: "https://你的專案id-default-rtdb.asia-southeast1.firebasedatabase.app", 再按一次連線。');
+  }
   return obj;
 }
 
@@ -3202,6 +3233,7 @@ function applyRemoteSnapshot(remote){
   saveLS(LS_KEYS.products, products);
   saveLS(LS_KEYS.logs, logs);
   saveLS(LS_KEYS.videos, videos);
+  saveLS(LOCAL_CHANGE_LS_KEY, remote.updatedAt || Date.now());
   renderAll();
   cloudLastSyncedAt = Date.now();
   renderSyncStatus();
