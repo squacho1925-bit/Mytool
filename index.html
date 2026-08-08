@@ -2089,6 +2089,17 @@ function addRecipeBlock(container, recipe){
     <button type="button" class="btn btn-outline btn-sm add-stage-btn" style="margin-top:4px;">＋ 新增階段</button>
   `;
   block.querySelector('.recipe-type').value = curType;
+  // 選擇配方類型時，自動把左邊的名稱欄位帶成對應的預設名稱，不用另外手動輸入；
+  // 但如果使用者已經把名稱改成自訂的文字（不是任何一種預設類型標籤），就不會被覆蓋掉。
+  const nameInput = block.querySelector('.recipe-name');
+  const typeSelect = block.querySelector('.recipe-type');
+  if(!nameInput.value.trim()){ nameInput.value = recipeTypeLabel(typeSelect.value); }
+  typeSelect.addEventListener('change', () => {
+    const presetLabels = Object.values(RECIPE_TYPE_LABELS);
+    if(!nameInput.value.trim() || presetLabels.includes(nameInput.value.trim())){
+      nameInput.value = recipeTypeLabel(typeSelect.value);
+    }
+  });
   const stageListBox = block.querySelector('.stage-list');
   // 相容舊資料：若是舊版單一 ingredients 陣列（沒有 stages），包成一個沒有名稱的階段
   const stages = (recipe && recipe.stages) || (recipe && recipe.ingredients ? [{ id:uid(), name:'', ingredients:recipe.ingredients }] : []);
@@ -2184,8 +2195,8 @@ function openProductForm(editId){
         addRecipeBlock(recipesBox, { name:'主配方', type:'base', stages:[] });
       }
       $('#btn-add-recipe', box).addEventListener('click', () => {
-        const count = recipesBox.querySelectorAll('.recipe-block').length;
-        addRecipeBlock(recipesBox, { name: count===0?'主配方':`口味調整配方 ${count}`, type: count===0?'base':'flavor', stages:[] });
+        const hasBase = $$('.recipe-block', box).some(b => isBaseRecipeType(b.querySelector('.recipe-type').value));
+        addRecipeBlock(recipesBox, { name:'', type: hasBase ? 'flavor' : 'base', stages:[] });
       });
       $('#f-pname', box).focus();
 
